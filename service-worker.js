@@ -1,4 +1,4 @@
-const CACHE_NAME='gm-static-v9.4';
+const CACHE_NAME='gm-static-v10.5';
 const STATIC_ASSETS=[
   './',
   './manifest.json',
@@ -6,6 +6,7 @@ const STATIC_ASSETS=[
   './icon-512.png',
   './apple-touch-icon.png',
   './favicon-64.png',
+  './logo-bachmai.png',
   './qr-gui-mau.png'
 ];
 
