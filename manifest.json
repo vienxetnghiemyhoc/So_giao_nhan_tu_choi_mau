@@ -1,0 +1,16 @@
+{
+  "id": "./?mode=staff",
+  "name": "Giao nhận mẫu - Viện Xét nghiệm Y học",
+  "short_name": "Giao nhận mẫu",
+  "description": "Ứng dụng nội bộ giao nhận và từ chối mẫu bệnh phẩm - Viện Xét nghiệm Y học, Bệnh viện Bạch Mai",
+  "start_url": "./?mode=staff",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f9f8",
+  "theme_color": "#137333",
+  "lang": "vi",
+  "icons": [
+    {"src":"./icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"./icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}
