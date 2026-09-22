@@ -6,7 +6,7 @@
   "start_url": "./?mode=staff",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f7f9f8",
+  "background_color": "#f1f3f4",
   "theme_color": "#f1f3f4",
   "lang": "vi",
   "icons": [
