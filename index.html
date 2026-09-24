@@ -246,13 +246,13 @@
     </section>
   </main>
 
-  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 28.16</footer>
+  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 29.16</footer>
 </div>
 <div id="modalRoot"></div><div id="toastWrap" class="toast-wrap"></div><div id="spinner" class="spinner-overlay hidden"><div class="spinner"></div></div>
 
 <script>
 /* ===== APP_CONFIG: START ===== */
-const APP_VERSION='28.16';
+const APP_VERSION='29.16';
 const API_URL='https://script.google.com/macros/s/AKfycbzajuPqWVK5K_GZ7Ab8b5qi7S1YfqffO5QFheoqJBBiFvvuqG1jo199n4-PvBOZgxP6Ew/exec';
 const CACHE_KEY_PUBLIC='GM_PUBLIC_CATALOG_CACHE_V4';
 const PUBLIC_RECHECK_MS=5*60*1000;
@@ -536,6 +536,14 @@ const ReceiveLogModule={
   },
   renderTransportSamples(){const box=Ui.el('transportSampleGrid');if(!box)return;const userSpec=State.user?.maChuyenNganh||'';if(State.transportRefreshing&&!AppCore.hasTransportCache(userSpec)){box.innerHTML='<div class="transport-empty">Đang tải cấu hình hệ thống vận chuyển...</div>';return}const specs=this.allowedTransportSpecialties();if(!specs.length){box.innerHTML='<div class="transport-empty">Chưa cấu hình phạm vi chuyên ngành nhận mẫu cho hệ thống này.</div>';return}box.innerHTML=specs.map(s=>`<div class="transport-sample-item"><div class="sample-name">${Ui.esc(s.shortName||s.code)}</div><input class="control transport-sample-qty" type="number" min="0" step="1" value="0" data-code="${Ui.esc(s.code)}"></div>`).join('')},
   resetTransportForm(){AC.transportUnit?.clear();Ui.el('transportStationNo').value='';Ui.el('transportStationHint').textContent='';document.querySelectorAll('.transport-sample-qty').forEach(x=>x.value='0');if(State.user){Ui.el('transportReceiverId').value=State.user.maNhanVien;Ui.el('transportReceiverText').value=employeeLabel({maNhanVien:State.user.maNhanVien,tenNhanVien:State.user.tenNhanVien})}this.renewTransportRequestId()},
+  resetTransportForNext(){
+    AC.transportUnit?.clear();
+    const unitText=Ui.el('transportUnitText'),unitId=Ui.el('transportUnitId'),stationNo=Ui.el('transportStationNo'),stationHint=Ui.el('transportStationHint');
+    if(unitText)unitText.value='';if(unitId)unitId.value='';if(stationNo)stationNo.value='';if(stationHint)stationHint.textContent='';
+    document.querySelectorAll('.transport-sample-qty').forEach(x=>x.value='0');
+    this.renewTransportRequestId();
+    setTimeout(()=>unitText?.focus(),0);
+  },
   transportFormData(){const samples={};document.querySelectorAll('.transport-sample-qty').forEach(el=>samples[el.dataset.code]=Number(el.value||0));return{requestId:this.ensureTransportRequestId(),transportSystemId:Ui.el('transportSystem').value,unitId:Ui.el('transportUnitId').value,transportStationNo:Ui.el('transportStationNo').value,samples,receiverEmployeeId:Ui.el('transportReceiverId').value}},
   validateTransportData(d){if(!d.transportSystemId){Ui.toast('Vui lòng chọn Hệ thống vận chuyển.','error');Ui.el('transportSystem').focus();return false}if(!d.unitId){Ui.toast('Vui lòng chọn Viện/TT/Khoa gửi mẫu.','error');Ui.el('transportUnitText').focus();return false}if(!Object.values(d.samples).some(v=>Number(v)>0)){Ui.toast('Vui lòng nhập số lượng ống.','error');return false}if(!d.receiverEmployeeId){Ui.toast('Vui lòng chọn Người nhận.','error');Ui.el('transportReceiverText').focus();return false}return true},
   transportQueueKey(){return TRANSPORT_QUEUE_KEY_PREFIX+(State.user?.maNhanVien||'ANON')},
