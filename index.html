@@ -246,13 +246,13 @@
     </section>
   </main>
 
-  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 29.16</footer>
+  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 30.16</footer>
 </div>
 <div id="modalRoot"></div><div id="toastWrap" class="toast-wrap"></div><div id="spinner" class="spinner-overlay hidden"><div class="spinner"></div></div>
 
 <script>
 /* ===== APP_CONFIG: START ===== */
-const APP_VERSION='29.16';
+const APP_VERSION='30.16';
 const API_URL='https://script.google.com/macros/s/AKfycbzajuPqWVK5K_GZ7Ab8b5qi7S1YfqffO5QFheoqJBBiFvvuqG1jo199n4-PvBOZgxP6Ew/exec';
 const CACHE_KEY_PUBLIC='GM_PUBLIC_CATALOG_CACHE_V4';
 const PUBLIC_RECHECK_MS=5*60*1000;
@@ -429,14 +429,11 @@ const AppCore={
   applyCatalogResponse(data){let changed=false;if(data?.catalogsChanged&&data.catalogs){State.catalogs.units=data.catalogs.units||[];State.catalogs.specialties=data.catalogs.specialties||[];changed=true}if(data?.configVersion)State.configVersion=Number(data.configVersion||0);if(data?.transportCatalogsChanged&&data.transportCatalogs){State.catalogs.transportSystems=data.transportCatalogs.systems||[];State.catalogs.transportStations=data.transportCatalogs.stations||[];State.catalogs.transportScope=data.transportCatalogs.scope||[];this.markTransportCacheReady(State.user?.maChuyenNganh||'');changed=true}if(data?.transportConfigVersion)State.transportConfigVersion=Number(data.transportConfigVersion||0);if(changed)this.saveCache()},
   applyTransportCatalogResponse(data){if(!data)return false;let changed=false;if(data.transportCatalogsChanged&&data.transportCatalogs){State.catalogs.transportSystems=data.transportCatalogs.systems||[];State.catalogs.transportStations=data.transportCatalogs.stations||[];State.catalogs.transportScope=data.transportCatalogs.scope||[];this.markTransportCacheReady(State.user?.maChuyenNganh||'');changed=true}if(data.transportConfigVersion)State.transportConfigVersion=Number(data.transportConfigVersion||0);if(changed)this.saveCache();return changed},
   applyPublicCatalogResponse(data){if(data?.catalogsChanged&&data.catalogs)State.catalogs=this.preparePublicCatalogs(data.catalogs);if(data?.publicCatalogVersion)State.publicCatalogVersion=Number(data.publicCatalogVersion||0);State.publicLastCheckedAt=Date.now();this.savePublicCache()},
-  compareVersions(a,b){const pa=String(a||'0').split('.').map(Number),pb=String(b||'0').split('.').map(Number),n=Math.max(pa.length,pb.length);for(let i=0;i<n;i++){const x=pa[i]||0,y=pb[i]||0;if(x>y)return 1;if(x<y)return-1}return 0},
   applyApiCompatibility(data){
     const serverSchema=Number(data?.apiSchemaVersion||0),serverVersion=String(data?.appVersion||'');
     State.serverApiSchemaVersion=serverSchema;State.serverAppVersion=serverVersion;
-    const versionCmp=this.compareVersions(serverVersion,APP_VERSION);
-    if(serverSchema>API_SCHEMA_VERSION||versionCmp>0){State.apiCompatible=false;Ui.versionBanner('Có phiên bản mới của ứng dụng. Vui lòng tải lại phiên bản mới để tiếp tục.','TẢI LẠI PHIÊN BẢN',()=>PwaInstall.reloadLatest(),'frontend');this.applyReceiveCompatibility();return false}
-    if(serverSchema<API_SCHEMA_VERSION||versionCmp<0){State.apiCompatible=false;Ui.versionBanner('Hệ thống đang hoàn tất cập nhật. Vui lòng kiểm tra lại sau.','KIỂM TRA LẠI',()=>StaffApp.checkCompatibility(),'backend');this.applyReceiveCompatibility();return false}
-    State.apiCompatible=true;Ui.hideVersionBanner();this.applyReceiveCompatibility();return true
+    if(serverSchema!==API_SCHEMA_VERSION){State.apiCompatible=false;Ui.versionBanner('Hệ thống đang hoàn tất cập nhật. Vui lòng kiểm tra lại sau.','KIỂM TRA LẠI',()=>StaffApp.checkCompatibility(),'backend');this.applyReceiveCompatibility();return false}
+    State.apiCompatible=true;const bar=Ui.el('versionBanner');if(!bar?.classList.contains('frontend'))Ui.hideVersionBanner();this.applyReceiveCompatibility();return true
   },
   applyReceiveCompatibility(){const b=Ui.el('transportReceiveBtn');if(b)b.disabled=!State.apiCompatible},
   notifyFrontendUpdate(message){Ui.versionBanner(message||'Có phiên bản mới của ứng dụng. Vui lòng tải lại để sử dụng bản mới nhất.','TẢI LẠI PHIÊN BẢN',()=>PwaInstall.reloadLatest(),'frontend')},
@@ -570,7 +567,7 @@ const ReceiveLogModule={
   renderReceiveState(){if(State.receive.loaded)this.render();else this.renderUnloaded()},
   initTransportQueue(){this.loadTransportQueue();this.renderTransportQueueStatus();this.renderReceiveState();this.processTransportQueue()},
   renderTransportQueueStatus(){const row=Ui.el('transportQueueRow'),label=Ui.el('transportQueueStatus'),btn=Ui.el('transportSyncBtn');if(!row||!label||!btn)return;const q=State.transportQueue||[],failed=q.filter(x=>x.status==='failed').length,waiting=q.filter(x=>x.status==='waiting').length;row.classList.toggle('error',failed>0);row.classList.toggle('pending',!failed&&q.length>0);if(!q.length){label.textContent='Đã đồng bộ';btn.classList.add('hidden');return}if(failed){label.textContent=`Có ${failed} lượt chưa đồng bộ`;btn.classList.remove('hidden');return}if(waiting){label.textContent=`Có ${waiting} lượt đang chờ đồng bộ`;btn.classList.remove('hidden');return}label.textContent=`Chờ đồng bộ: ${q.length}`;btn.classList.add('hidden')},
-  async enqueueTransport(btn){if(!State.apiCompatible){AppCore.applyReceiveCompatibility();Ui.toast('Phiên bản ứng dụng và máy chủ chưa đồng bộ. Vui lòng làm theo thông báo cập nhật phía trên.','error');return}const d=this.transportFormData();if(!this.validateTransportData(d))return;if(btn?.dataset.busy==='1')return;Ui.setButtonBusy(btn,true);try{const item={schemaVersion:TRANSPORT_QUEUE_SCHEMA,payload:d,status:'pending',attempts:0,nextAt:0,lastError:'',queuedAt:Date.now(),clientQueuedAt:Ui.nowLocalInput()};State.transportQueue.push(item);if(!this.persistTransportQueue()){State.transportQueue.pop();return}this.upsertLocalQueueRow(item);this.resetTransportForNext();this.renderTransportQueueStatus();this.wakeTransportQueue(true,false)}finally{setTimeout(()=>Ui.setButtonBusy(btn,false),80)}},
+  async enqueueTransport(btn){if(!State.apiCompatible){AppCore.applyReceiveCompatibility();Ui.toast('API hiện chưa tương thích. Vui lòng làm theo thông báo phía trên.','error');return}const d=this.transportFormData();if(!this.validateTransportData(d))return;if(btn?.dataset.busy==='1')return;Ui.setButtonBusy(btn,true);try{const item={schemaVersion:TRANSPORT_QUEUE_SCHEMA,payload:d,status:'pending',attempts:0,nextAt:0,lastError:'',queuedAt:Date.now(),clientQueuedAt:Ui.nowLocalInput()};State.transportQueue.push(item);if(!this.persistTransportQueue()){State.transportQueue.pop();return}this.upsertLocalQueueRow(item);this.resetTransportForNext();this.renderTransportQueueStatus();this.wakeTransportQueue(true,false)}finally{setTimeout(()=>Ui.setButtonBusy(btn,false),80)}},
   isRetryableTransportError(e){const m=String(e?.message||e||'');return /failed to fetch|network|load failed|kết nối|timeout|timed out/i.test(m)},
   wakeTransportQueue(resetAttempts=false,includeFailed=false){if(!State.user||!State.apiCompatible)return;(State.transportQueue||[]).forEach(x=>{if(x.status==='waiting'||(includeFailed&&x.status==='failed')){x.status='pending';x.nextAt=0;if(resetAttempts)x.attempts=0;x.lastError='';this.setLocalQueueStatus(x,'pending','')}});this.persistTransportQueue();this.renderTransportQueueStatus();this.processTransportQueue()},
   scheduleTransportQueue(ms){if(State.transportQueueTimer)clearTimeout(State.transportQueueTimer);State.transportQueueTimer=setTimeout(()=>{State.transportQueueTimer=null;this.processTransportQueue()},Math.max(250,ms||500))},
