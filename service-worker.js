@@ -1,4 +1,4 @@
-const CACHE_NAME='gm-static-v33.19';
+const CACHE_NAME='gm-static-v34.19';
 const STATIC_ASSETS=[
   './',
   './manifest.json',
@@ -6,8 +6,7 @@ const STATIC_ASSETS=[
   './icon-512.png',
   './apple-touch-icon.png',
   './favicon-64.png',
-  './logo-bachmai.png',
-  './qr-gui-mau.png'
+  './logo-bachmai.png'
 ];
 
 self.addEventListener('install',event=>{
