@@ -257,13 +257,13 @@
     </section>
   </main>
 
-  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 38.23</footer>
+  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 39.23</footer>
 </div>
 <div id="modalRoot"></div><div id="toastWrap" class="toast-wrap"></div><div id="spinner" class="spinner-overlay hidden"><div class="spinner"></div></div>
 
 <script>
 /* ===== APP_CONFIG: START ===== */
-const APP_VERSION='38.23';
+const APP_VERSION='39.23';
 const API_URL='https://script.google.com/macros/s/AKfycbzajuPqWVK5K_GZ7Ab8b5qi7S1YfqffO5QFheoqJBBiFvvuqG1jo199n4-PvBOZgxP6Ew/exec';
 const CACHE_KEY_PUBLIC='GM_PUBLIC_CATALOG_CACHE_V6';
 const PUBLIC_RECHECK_MS=5*60*1000;
@@ -982,7 +982,7 @@ const SettingsModule={
       const scope=this.ensureUnitScope();
       body=`<div class="form-stack"><div class="field"><label>Mã nhóm mẫu *</label><input id="rpCode" class="control" value="${Ui.esc(item?.code||'')}" ${isExisting?'disabled':''}></div><div class="field"><label>Tên nhóm mẫu *</label><input id="rpName" class="control" value="${Ui.esc(item?.name||'')}"></div><div class="field"><label>Chuyên ngành</label><input class="control" value="${Ui.esc(specs.find(x=>x.code===scope)?.name||State.user?.tenChuyenNganh||scope)}" disabled></div><div class="field-row"><div class="field"><label>Trạng thái</label><select id="rpStatus" class="control"><option>Hoạt động</option><option>Ngừng hoạt động</option></select></div><div class="field"><label>Thứ tự</label><input id="rpOrder" class="control" type="number" min="0" value="${Number(item?.order||0)}"></div></div></div>`;
     }
-    const root=Ui.el('modalRoot');root.innerHTML=`<div class="modal-backdrop"><div class="modal"><div class="modal-head"><div class="modal-title">${index>=0?'SỬA':'THÊM'} ${Ui.esc(type==='POINT'?'ĐIỂM TIẾP NHẬN':type==='ASSIGNMENT'?'PHÂN CÔNG ĐIỂM NHẬN':'NHÓM MẪU')}</div><button class="icon-btn modal-close" type="button">${ICONS.close}</button></div><div class="modal-body">${body}</div><div class="modal-foot"><button class="btn btn-outline modal-cancel" type="button">HỦY</button><button class="btn btn-primary modal-save" type="button">ÁP DỤNG</button></div></div></div>`;
+    const root=Ui.el('modalRoot');root.innerHTML=`<div class="modal-backdrop"><div class="modal"><div class="modal-head"><div class="modal-title">${index>=0?'SỬA':'THÊM'} ${Ui.esc(type==='POINT'?'ĐIỂM TIẾP NHẬN':type==='ASSIGNMENT'?'PHÂN CÔNG ĐIỂM NHẬN':'NHÓM MẪU')}</div><button class="icon-btn modal-close" type="button">${SVG.close}</button></div><div class="modal-body">${body}</div><div class="modal-foot"><button class="btn btn-outline modal-cancel" type="button">HỦY</button><button class="btn btn-primary modal-save" type="button">ÁP DỤNG</button></div></div></div>`;
     const close=()=>root.innerHTML='';root.querySelector('.modal-close').onclick=close;root.querySelector('.modal-cancel').onclick=close;root.querySelector('#rpStatus').value=item?.status||'Hoạt động';
     root.querySelector('.modal-save').onclick=()=>{let data;if(type==='POINT')data={code:root.querySelector('#rpCode').value.trim().toUpperCase(),name:root.querySelector('#rpName').value.trim(),status:root.querySelector('#rpStatus').value,order:Number(root.querySelector('#rpOrder').value||0)};else if(type==='ASSIGNMENT')data={specialtyCode:item?.specialtyCode||root.querySelector('#rpSpec').value,pointCode:root.querySelector('#rpPoint').value,status:root.querySelector('#rpStatus').value,order:Number(root.querySelector('#rpOrder').value||0)};else data={code:root.querySelector('#rpCode').value.trim().toUpperCase(),name:root.querySelector('#rpName').value.trim(),specialtyCode:item?.specialtyCode||this.ensureUnitScope(),status:root.querySelector('#rpStatus').value,order:Number(root.querySelector('#rpOrder').value||0)};data.isNew=item?.isNew??true;data.original=item?.original||{};const keyFn=type==='POINT'?(r=>String(r.code||'').toUpperCase()):type==='ASSIGNMENT'?(r=>String(r.specialtyCode||'').toUpperCase()):(r=>String(r.specialtyCode||'').toUpperCase()+'|'+String(r.code||'').toUpperCase());this.commitDraftRow(index,data,keyFn)};
   },
