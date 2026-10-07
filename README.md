@@ -1,3 +1,5 @@
-# Sổ giao nhận / Từ chối mẫu 32.17
-
-Bản hai cơ sở CSHN + CSNB. Xem `HUONG_DAN_NANG_CAP_32.17.txt` trước khi triển khai.
+Sổ giao nhận / từ chối mẫu - Version 56.39
+- Frontend: index 56.39.html / index.html
+- Backend: Code 56.39.gs
+- PWA: service-worker 56.39.js / service-worker.js + manifest/icons
+- Thay đổi vòng này: chuẩn hóa đăng nhập authLogin -> staffPreload -> cache phiên -> vào app; timeout/retry hữu hạn, không preload nhiều request song song.
