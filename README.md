@@ -1,5 +1,12 @@
-Sổ giao nhận / từ chối mẫu - Version 57.40
-- Frontend: index 57.40.html / index.html
-- Backend: Code 57.40.gs
-- PWA: service-worker 57.40.js / service-worker.js + manifest/icons
-- Thay đổi vòng này: Cài đặt mở tab ngay, không dùng màn hình chờ toàn màn hình; toàn bộ dữ liệu Cài đặt theo quyền tải bằng một settingsPreload duy nhất, mỗi Sheet cấu hình đọc một lần trong request, cache theo user trong phiên; timeout/retry hữu hạn và lỗi hiển thị trong vùng Cài đặt.
+Sổ giao nhận / từ chối mẫu - Version 58.41
+- Frontend: index 58.41.html / index.html
+- Backend: Code 58.41.gs
+- PWA: service-worker 58.41.js / service-worker.js + manifest/icons
+
+Nâng từ 57.40:
+1. Cập nhật Code 58.41.gs vào Apps Script.
+2. Chạy gm_upgradeSchemaTo5841() MỘT LẦN trước khi sử dụng bản mới với dữ liệu hiện hữu.
+3. Hàm nâng schema bổ sung PointType cho DIEM_NHAN_MAU, SampleMode cho GIAO_NHAN và chuyển Master Vị trí phát hiện/Lý do từ chối sang Master chung hai cơ sở. SampleJson lịch sử được giữ nguyên.
+4. Sau đó cập nhật frontend/PWA.
+
+Lưu ý: không đổi Script ID/Deployment ID khi triển khai; file này chỉ là gói mã nguồn, chưa triển khai.
