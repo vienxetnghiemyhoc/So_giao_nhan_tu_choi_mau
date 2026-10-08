@@ -288,6 +288,7 @@
                 <button data-reject-menu="REASON">Lý do từ chối mẫu</button>
               </div>
               <button class="admin-only" data-settings="summary">Tổng hợp ngày</button>
+              <button class="admin-only" data-settings="queueCleanup">Dữ liệu chưa đồng bộ</button>
               <button data-settings="password">Mật khẩu</button>
               <button data-settings="qr">Mã QR ứng dụng</button>
               <button data-settings="install">Cài đặt ứng dụng</button>
@@ -302,13 +303,13 @@
     </section>
   </main>
 
-  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 64.46</footer>
+  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 65.46</footer>
 </div>
 <div id="modalRoot"></div><div id="toastWrap" class="toast-wrap"></div><div id="spinner" class="spinner-overlay hidden"><div class="spinner"></div></div>
 
 <script>
 /* ===== APP_CONFIG: START ===== */
-const APP_VERSION='64.46';
+const APP_VERSION='65.46';
 const API_URL='https://script.google.com/macros/s/AKfycbzajuPqWVK5K_GZ7Ab8b5qi7S1YfqffO5QFheoqJBBiFvvuqG1jo199n4-PvBOZgxP6Ew/exec';
 const CACHE_KEY_PUBLIC='GM_PUBLIC_CATALOG_CACHE_V7';
 const PUBLIC_RECHECK_MS=5*60*1000;
@@ -978,7 +979,7 @@ const SettingsModule={
   async changeUnitScope(next){if(!this.isAdmin()||!next||next===State.settings.unitScope)return;const go=async()=>{State.settings.unitScope=next;State.settings.rejectSpecialty=next;State.settings.loaded=false;this.resetDraft();const bundle=State.settings.preloadBundle||this.readPreloadBundle();if(bundle&&this.applyBundleScope(bundle,next,true))return;await this.preloadAllAuthorizedSettings(true)};if(this.hasUnsavedChanges()){this.guardChanges(go);return}await go()},
   sectionTitle(){
     const s=State.settings.section;
-    if(s==='employees')return'NHÂN VIÊN';if(s==='units')return'ĐƠN VỊ GỬI';if(s==='specialties')return'CHUYÊN NGÀNH';if(s==='receivePointConfig')return({POINT:'ĐIỂM TIẾP NHẬN MẪU',ASSIGNMENT:'PHÂN CÔNG ĐIỂM NHẬN',GROUP:'NHÓM XÉT NGHIỆM'})[State.settings.receivePointSub||'POINT'];if(s==='password')return'MẬT KHẨU';if(s==='qr')return'MÃ QR ỨNG DỤNG';if(s==='install')return'CÀI ĐẶT ỨNG DỤNG';if(s==='summary')return'TỔNG HỢP NGÀY';
+    if(s==='employees')return'NHÂN VIÊN';if(s==='units')return'ĐƠN VỊ GỬI';if(s==='specialties')return'CHUYÊN NGÀNH';if(s==='receivePointConfig')return({POINT:'ĐIỂM TIẾP NHẬN MẪU',ASSIGNMENT:'PHÂN CÔNG ĐIỂM NHẬN',GROUP:'NHÓM XÉT NGHIỆM'})[State.settings.receivePointSub||'POINT'];if(s==='password')return'MẬT KHẨU';if(s==='qr')return'MÃ QR ỨNG DỤNG';if(s==='install')return'CÀI ĐẶT ỨNG DỤNG';if(s==='summary')return'TỔNG HỢP NGÀY';if(s==='queueCleanup')return'DỮ LIỆU CHƯA ĐỒNG BỘ';
     if(s==='rejectConfig')return({LOCATION:'VỊ TRÍ PHÁT HIỆN',TEST_TYPE:'LOẠI XÉT NGHIỆM',REASON:'LÝ DO TỪ CHỐI MẪU'})[State.settings.rejectSub||'LOCATION']||'CẤU HÌNH TỪ CHỐI MẪU';
     if(s==='transportConfig')return({SYSTEM:'HỆ THỐNG VẬN CHUYỂN',STATION:'TRẠM VẬN CHUYỂN',SCOPE:'PHẠM VI NHẬN MẪU'})[State.settings.transportSub||'SYSTEM']||'HỆ THỐNG VẬN CHUYỂN';
     return'CÀI ĐẶT';
@@ -1002,7 +1003,7 @@ const SettingsModule={
     if(['password','qr','install'].includes(section))return true;
     if(!this.isManager())return false;
     if(['employees','rejectConfig','receivePointConfig'].includes(section))return true;
-    return this.isAdmin()&&['units','specialties','transportConfig','summary'].includes(section);
+    return this.isAdmin()&&['units','specialties','transportConfig','summary','queueCleanup'].includes(section);
   },
   currentKind(){
     const s=State.settings.section;
@@ -1185,6 +1186,7 @@ const SettingsModule={
     if(s==='password')box.innerHTML=this.renderPassword();
     else if(s==='qr')box.innerHTML=this.renderQr();
     else if(s==='install')box.innerHTML=this.renderInstall();
+    else if(s==='queueCleanup')box.innerHTML=this.renderQueueCleanup();
     else if(!State.settings.data?.catalogs){box.innerHTML='<div class="empty-state">Chưa tải dữ liệu cài đặt.</div>';return}
     else if(s==='employees')box.innerHTML=this.renderEmployees();
     else if(s==='units')box.innerHTML=this.renderCatalogTable('UNIT','Đơn vị gửi');
@@ -1343,10 +1345,46 @@ const SettingsModule={
   },
   renderQr(){const c=State.settings.data?.catalogs||State.catalogs,spec=String(State.user?.maChuyenNganh||'').toUpperCase(),assigned=new Set((c.receivePointAssignments||[]).filter(a=>a.status==='Hoạt động'&&String(a.specialtyCode||'').toUpperCase()===spec).map(a=>String(a.pointCode||'').toUpperCase())),points=(c.receivePoints||[]).filter(x=>{if(x.status!=='Hoạt động')return false;const code=String(x.code||'').toUpperCase(),type=pointTypeOf(x),dep=String(x.departmentSpecialtyCode||'').toUpperCase();return assigned.has(code)&&(type==='CENTRAL'||(type==='DEPARTMENT'&&dep===spec))}).sort((a,b)=>compareCatalogOrder(a,b));if(!points.length)return `<div class="settings-section"><div class="settings-toolbar"><div><h2 class="card-title" style="margin:0;color:var(--gm-green)">MÃ QR GỬI MẪU XÉT NGHIỆM</h2><div class="small muted">Mỗi Điểm tiếp nhận có một QR riêng.</div></div></div><div class="empty-state">Chưa có Điểm tiếp nhận mẫu đang hoạt động.</div></div>`;const cards=points.map((p,i)=>{const code=String(p.code||'').toUpperCase(),link=publicSendUrl(State.user?.maCoSo,code),type=pointTypeOf(p),previewId=`qrPosterPreview_${i}`;return `<div class="qr-point-card"><div class="qr-point-card-head"><div><div class="qr-point-card-title">${Ui.esc(p.name||code)}</div><div class="qr-point-card-meta"><span class="qr-point-badge">${Ui.esc(type)}</span><span class="qr-point-id">ReceivePointId: ${Ui.esc(code)}</span></div></div></div><div id="${previewId}" class="qr-box" data-qr-preview data-point="${Ui.esc(code)}"></div><div class="qr-point-card-tools"><div class="field"><label>Link gửi mẫu</label><div class="link-box"><input class="control qr-public-link" value="${Ui.esc(link)}" readonly><button class="btn btn-outline" data-action="copyPublicLink" data-point="${Ui.esc(code)}">SAO CHÉP</button></div></div><div class="actions"><button class="btn btn-primary" data-action="downloadQr" data-point="${Ui.esc(code)}">TẢI MÃ QR</button><button class="btn btn-outline" data-action="printQr" data-point="${Ui.esc(code)}">IN MÃ QR</button></div></div></div>`}).join('');return `<div class="settings-section"><div class="settings-toolbar"><div><h2 class="card-title" style="margin:0;color:var(--gm-green)">MÃ QR GỬI MẪU XÉT NGHIỆM</h2><div class="small muted">Chỉ hiển thị QR của Điểm tập trung được phân công cho chuyên ngành của bạn và Điểm tại chính khoa của bạn. Mỗi điểm có một QR độc lập, chỉ mang ReceivePointId của chính điểm đó.</div></div></div><div class="qr-point-grid">${cards}</div><p class="utility-note">QR của điểm đã ngừng hoạt động sẽ không tự chuyển sang điểm khác; khi quét, backend kiểm tra lại Điểm tiếp nhận, PointType và SampleMode hiện hành.</p></div>`},
   renderInstall(){const installed=PwaInstall.isStandalone(),status=installed?'Ứng dụng đã được cài đặt và đang chạy ở chế độ ứng dụng.':PwaInstall.deferredPrompt?'Thiết bị sẵn sàng cài đặt ứng dụng.':'Nếu nút cài nhanh chưa khả dụng, có thể cài từ menu của Chrome/Edge.';return `<div class="settings-section install-card"><div class="settings-toolbar"><div><h2 class="card-title" style="margin:0;color:var(--gm-green)">CÀI ĐẶT ỨNG DỤNG</h2><div class="small muted">Cài giao diện STAFF trên máy tính để mở như một ứng dụng độc lập.</div></div></div><div class="install-status">${Ui.esc(status)}</div><div class="field"><label>Đường dẫn khởi động</label><input class="control" value="${Ui.esc(STAFF_APP_URL)}" readonly></div><div class="actions"><button class="btn btn-primary" data-action="installApp" ${installed?'disabled':''}>${installed?'ĐÃ CÀI ĐẶT':'CÀI ĐẶT ỨNG DỤNG'}</button></div><p class="utility-note">Ứng dụng chỉ cache khung giao diện và tài nguyên tĩnh. Token đăng nhập, Sổ giao nhận, Sổ từ chối và dữ liệu nghiệp vụ không được lưu vào cache của Service Worker.</p></div>`},
+  queueCleanupStats(){
+    const defs=[
+      {key:'receive',label:'Sổ giao nhận',prefix:TRANSPORT_QUEUE_KEY_PREFIX},
+      {key:'reject',label:'Sổ từ chối',prefix:REJECT_QUEUE_KEY_PREFIX},
+      {key:'consult',label:'Sổ tư vấn',prefix:CONSULT_QUEUE_KEY_PREFIX}
+    ],out={receive:{keys:0,items:0},reject:{keys:0,items:0},consult:{keys:0,items:0},totalKeys:0,totalItems:0};
+    try{
+      Object.keys(localStorage).forEach(k=>{
+        const def=defs.find(d=>k.startsWith(d.prefix));if(!def)return;
+        let parsed=null;try{parsed=JSON.parse(localStorage.getItem(k)||'null')}catch(e){}
+        const items=Array.isArray(parsed)?parsed:(Array.isArray(parsed?.items)?parsed.items:[]);
+        out[def.key].keys++;out[def.key].items+=items.length;out.totalKeys++;out.totalItems+=items.length;
+      });
+    }catch(e){}
+    return out;
+  },
+  renderQueueCleanup(){
+    if(!this.isAdmin())return '<div class="empty-state">Chỉ Admin được sử dụng chức năng này.</div>';
+    const s=this.queueCleanupStats(),disabled=s.totalKeys?'':'disabled';
+    return `<div class="settings-section"><div class="settings-toolbar"><div><h2 class="card-title" style="margin:0;color:var(--gm-green)">DỮ LIỆU CHƯA ĐỒNG BỘ TRÊN TRÌNH DUYỆT NÀY</h2><div class="small muted">Chỉ Admin nhìn thấy chức năng này. Dùng để xóa các lệnh đang nằm trong hàng đợi localStorage của trình duyệt/profile hiện tại.</div></div></div><div class="settings-grid" style="max-width:760px"><div class="card settings-section"><strong>Sổ giao nhận</strong><div class="small muted">${s.receive.items} lượt chưa đồng bộ · ${s.receive.keys} hàng đợi</div></div><div class="card settings-section"><strong>Sổ từ chối</strong><div class="small muted">${s.reject.items} lượt chưa đồng bộ · ${s.reject.keys} hàng đợi</div></div><div class="card settings-section"><strong>Sổ tư vấn</strong><div class="small muted">${s.consult.items} lượt chưa đồng bộ · ${s.consult.keys} hàng đợi</div></div><div class="card settings-section"><strong>Tổng</strong><div class="small muted">${s.totalItems} lượt · ${s.totalKeys} hàng đợi</div></div></div><div class="actions" style="margin-top:14px"><button class="btn btn-primary" data-action="clearUnsyncedLocalQueues" ${disabled}>XÓA DỮ LIỆU CHƯA ĐỒNG BỘ</button></div><p class="utility-note"><strong>Không xóa</strong> dữ liệu đã ghi lên Google Sheet, không xóa cấu hình, không xóa token đăng nhập. Thao tác này chỉ xóa hàng đợi chưa đồng bộ đang lưu trên trình duyệt/profile hiện tại. Nếu trình duyệt này từng đăng nhập nhiều tài khoản, hàng đợi của các tài khoản đó trên máy này cũng sẽ bị xóa.</p></div>`;
+  },
+  clearUnsyncedLocalQueues(btn){
+    if(!this.isAdmin())return Ui.toast('Chỉ Admin được xóa dữ liệu chưa đồng bộ.','error');
+    const s=this.queueCleanupStats();if(!s.totalKeys)return Ui.toast('Không có dữ liệu chưa đồng bộ trên trình duyệt này.','success');
+    if(State.transportQueueRunning||State.rejectQueueRunning||State.consultQueueRunning)return Ui.toast('Đang có lệnh gửi lên máy chủ. Vui lòng chờ vài giây rồi thử lại.','error');
+    const body=`<div class="form-stack"><p style="margin:0">Xóa <strong>${s.totalItems}</strong> lượt chưa đồng bộ trong <strong>${s.totalKeys}</strong> hàng đợi trên trình duyệt/profile này?</p><p class="small muted" style="margin:0">Sổ giao nhận: ${s.receive.items} · Sổ từ chối: ${s.reject.items} · Sổ tư vấn: ${s.consult.items}</p><p style="margin:0;color:#b3261e"><strong>Dữ liệu chưa đồng bộ sau khi xóa sẽ không thể khôi phục từ trình duyệt.</strong></p><p class="small muted" style="margin:0">Dữ liệu đã ghi thành công trên Google Sheet không bị ảnh hưởng.</p></div>`;
+    Ui.modal({title:'Xác nhận xóa dữ liệu chưa đồng bộ',confirmText:'XÓA DỮ LIỆU CHƯA ĐỒNG BỘ',cancelText:'HỦY',body,onConfirm:async()=>{
+      const prefixes=[TRANSPORT_QUEUE_KEY_PREFIX,REJECT_QUEUE_KEY_PREFIX,CONSULT_QUEUE_KEY_PREFIX],removed=[];
+      Object.keys(localStorage).forEach(k=>{if(prefixes.some(p=>k.startsWith(p))){removed.push(k);localStorage.removeItem(k)}});
+      State.transportQueue=[];State.rejectQueue=[];State.consultQueue=[];
+      State.receive.localRows=(State.receive.localRows||[]).filter(x=>x.localSyncStatus==='synced');State.reject.localRows=[];State.consult.localRows=[];
+      RejectSampleModule.resetQueueRuntime?.();ConsultModule.resetQueueRuntime?.();
+      Ui.toast(`Đã xóa ${removed.length} hàng đợi chưa đồng bộ trên trình duyệt này.`,'success');
+      setTimeout(()=>location.reload(),250);
+    }});
+  },
   renderSummary(){return `<div class="settings-section"><h2 class="card-title" style="color:var(--gm-green)">Tổng hợp lại dữ liệu ngày</h2><div class="field-row" style="max-width:520px"><div class="field"><label>Từ ngày</label><input id="summaryFrom" class="control" type="date"></div><div class="field"><label>Đến ngày</label><input id="summaryTo" class="control" type="date"></div></div><div class="actions"><button class="btn btn-primary" data-action="rebuildSummary">TỔNG HỢP LẠI</button></div><p class="small muted">Tổng hợp đồng thời Sổ giao nhận, Sổ từ chối và Sổ tư vấn vào các bảng AGG theo module. Trigger hằng ngày không tự xóa dữ liệu chi tiết.</p></div>`},
   bindRendered(){
     const box=Ui.el('settingsContent');
-    box.querySelectorAll('[data-action]').forEach(btn=>btn.addEventListener('click',()=>{const a=btn.dataset.action;if(a==='setRejectApplicabilityMode')return this.setRejectMode('APPLICABILITY');if(a==='setRejectMasterMode')return this.setRejectMode('MASTER');if(a==='setTestGroupApplicabilityMode')return this.setTestGroupMode('APPLICABILITY');if(a==='setTestGroupMasterMode')return this.setTestGroupMode('MASTER');if(a==='addSettingsDraft')this.addCurrentDraft();if(a==='editSettingsDraft'){this.captureDraft();const i=Number(btn.dataset.index),row=State.settings.draft?.[i],kind=this.currentKind();if(kind==='EMPLOYEES')this.employeeModal(row,i);else if(kind==='UNIT'||kind==='SPECIALTY')this.catalogModal(kind,row,i);else if(kind.startsWith('RECEIVE_POINT_')&&kind!=='RECEIVE_POINT_GROUP')this.receivePointModal(kind.replace('RECEIVE_POINT_',''),row,i);else if(kind.startsWith('TRANSPORT_'))this.transportModal(kind.replace('TRANSPORT_',''),row,i)}if(a==='removeSettingsDraft')this.removeDraftRow(Number(btn.dataset.index));if(a==='saveSettingsDraft')this.saveCurrentDraft(btn);if(a==='cancelSettingsDraft')this.cancelCurrentDraft();if(a==='downloadImportTemplate')ExcelSettingsImport.downloadTemplate();if(a==='importExcel')ExcelSettingsImport.pickFile();if(a==='rebuildSummary')this.rebuildSummary(btn);if(a==='copyPublicLink')this.copyPublicLink(btn);if(a==='downloadQr')this.downloadQr(btn);if(a==='printQr')this.printQr(btn);if(a==='installApp')PwaInstall.install(btn);if(a==='changePassword')this.changePassword(btn);if(a==='resetPassword')this.resetPassword()}));
+    box.querySelectorAll('[data-action]').forEach(btn=>btn.addEventListener('click',()=>{const a=btn.dataset.action;if(a==='setRejectApplicabilityMode')return this.setRejectMode('APPLICABILITY');if(a==='setRejectMasterMode')return this.setRejectMode('MASTER');if(a==='setTestGroupApplicabilityMode')return this.setTestGroupMode('APPLICABILITY');if(a==='setTestGroupMasterMode')return this.setTestGroupMode('MASTER');if(a==='addSettingsDraft')this.addCurrentDraft();if(a==='editSettingsDraft'){this.captureDraft();const i=Number(btn.dataset.index),row=State.settings.draft?.[i],kind=this.currentKind();if(kind==='EMPLOYEES')this.employeeModal(row,i);else if(kind==='UNIT'||kind==='SPECIALTY')this.catalogModal(kind,row,i);else if(kind.startsWith('RECEIVE_POINT_')&&kind!=='RECEIVE_POINT_GROUP')this.receivePointModal(kind.replace('RECEIVE_POINT_',''),row,i);else if(kind.startsWith('TRANSPORT_'))this.transportModal(kind.replace('TRANSPORT_',''),row,i)}if(a==='removeSettingsDraft')this.removeDraftRow(Number(btn.dataset.index));if(a==='saveSettingsDraft')this.saveCurrentDraft(btn);if(a==='cancelSettingsDraft')this.cancelCurrentDraft();if(a==='downloadImportTemplate')ExcelSettingsImport.downloadTemplate();if(a==='importExcel')ExcelSettingsImport.pickFile();if(a==='rebuildSummary')this.rebuildSummary(btn);if(a==='clearUnsyncedLocalQueues')this.clearUnsyncedLocalQueues(btn);if(a==='copyPublicLink')this.copyPublicLink(btn);if(a==='downloadQr')this.downloadQr(btn);if(a==='printQr')this.printQr(btn);if(a==='installApp')PwaInstall.install(btn);if(a==='changePassword')this.changePassword(btn);if(a==='resetPassword')this.resetPassword()}));
     const empSearch=Ui.el('settingsEmployeeSearch');if(empSearch){empSearch.addEventListener('input',()=>{State.settings.employeeSearch=empSearch.value;this.applyEmployeeSearch()});this.applyEmployeeSearch()}
     box.querySelectorAll('.employee-permission').forEach(el=>el.addEventListener('change',()=>{const i=Number(el.dataset.index),r=State.settings.draft?.[i];if(!r)return;const set=new Set(Array.isArray(r.tabsAllowed)?r.tabsAllowed:String(r.tabsAllowed||'').split(',').map(x=>x.trim()).filter(Boolean));el.checked?set.add(el.dataset.permission):set.delete(el.dataset.permission);r.tabsAllowed=[...set];this.updateDirty()}));box.querySelectorAll('.employee-export').forEach(el=>el.addEventListener('change',()=>{const r=State.settings.draft?.[Number(el.dataset.index)];if(!r)return;r.canExportExcel=el.checked;this.updateDirty()}));
     const mark=()=>{this.captureDraft()};box.querySelectorAll('.draft-name,.draft-status,.draft-order,.draft-other,.draft-apply,.draft-station-no,.draft-station-name').forEach(el=>el.addEventListener('input',mark));box.querySelectorAll('.draft-status,.draft-other,.draft-apply').forEach(el=>el.addEventListener('change',mark));
