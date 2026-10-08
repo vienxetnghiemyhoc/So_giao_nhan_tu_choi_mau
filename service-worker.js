@@ -1,4 +1,4 @@
-const CACHE_NAME='gm-static-v58.41';
+const CACHE_NAME='gm-static-v60.42';
 const STATIC_ASSETS=[
   './',
   './manifest.json',
