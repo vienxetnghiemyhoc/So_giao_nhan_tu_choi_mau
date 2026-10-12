@@ -403,7 +403,7 @@ function sampleModeForPoint(point){return pointTypeOf(point)==='DEPARTMENT'?'GRO
 function pointSampleFields(pointCode){const point=catalogReceivePoint(pointCode);if(!point||point.status!=='Hoạt động')return[];const assignments=(State.catalogs.receivePointAssignments||[]).filter(a=>a.status==='Hoạt động'&&String(a.pointCode||'').toUpperCase()===String(point.code||'').toUpperCase()),specMap={};(State.catalogs.specialties||[]).forEach(sp=>specMap[String(sp.code||'').toUpperCase()]=sp);if(pointTypeOf(point)==='CENTRAL'){const seen=new Set();return assignments.map(a=>String(a.specialtyCode||'').toUpperCase()).filter(code=>{if(!code||seen.has(code)||specMap[code]?.status!=='Hoạt động')return false;seen.add(code);return true}).map(code=>{const sp=specMap[code]||{};return{key:code,code,name:sp.shortName||code,specialtyCode:code,order:sp.order,hasOrder:sp.hasOrder,mode:'SPECIALTY_TOTAL'}}).sort((a,b)=>compareCatalogOrder(a,b,'name','code'))}const dep=String(point.departmentSpecialtyCode||assignments[0]?.specialtyCode||'').toUpperCase();return (State.catalogs.sampleGroups||[]).filter(g=>g.status==='Hoạt động'&&String(g.specialtyCode||'').toUpperCase()===dep).map(g=>({...g,key:g.key||`${dep}::${g.code}`,mode:'GROUP_DETAIL'})).sort((a,b)=>compareCatalogOrder(a,b))}
 function clientSampleFacts(rowOrSamples,storedMode=''){const samples=rowOrSamples?.samples||rowOrSamples||{},specialtyTotals={},groupDetails={};let hasGroup=false,hasBare=false;Object.entries(samples||{}).forEach(([k,v])=>{const n=Number(v||0)||0;if(n<=0)return;const key=String(k||'').toUpperCase(),i=key.indexOf('::');if(i>0){const sp=key.slice(0,i);hasGroup=true;groupDetails[key]=(groupDetails[key]||0)+n;specialtyTotals[sp]=(specialtyTotals[sp]||0)+n}else{hasBare=true;specialtyTotals[key]=(specialtyTotals[key]||0)+n}});let mode=String(storedMode||rowOrSamples?.sampleMode||'').toUpperCase();if(!mode)mode=hasGroup&&hasBare?'MIXED':hasGroup?'GROUP_DETAIL':hasBare?'SPECIALTY_TOTAL':'';return{mode,specialtyTotals,groupDetails}}
 
-function isRetryableApiError(e){const m=String(e?.message||e||'');return /failed to fetch|network|load failed|kết nối|timeout|timed out|không kết nối được máy chủ \((?:429|5\d\d)\)|too many simultaneous|too many times in a short time|invoked too many times per second|service unavailable|server error occurred|internal error|please wait a bit and try again/i.test(m);}
+function isRetryableApiError(e){const m=String(e?.message||e||'');return /failed to fetch|network|load failed|kết nối|timeout|timed out|không kết nối được máy chủ \((?:429|5\d\d)\)|too many simultaneous|too many times in a short time|invoked too many times per second|service unavailable|server error occurred|internal error|please wait a bit and try again|quá thời gian tải dữ liệu/i.test(m);}
 function retryDelayMs(base){const b=Math.max(300,Number(base||1000));return b+Math.floor(Math.random()*Math.min(500,Math.max(100,b*.25)));}
 
 /* ===== UI_UTILS: START ===== */
@@ -593,17 +593,23 @@ const PublicSendApp={
 /* ===== STAFF_APP_AUTH: START ===== */
 const StaffApp={
   async init(){
-    Ui.show('publicSendPage',false);Ui.el('loginForm').addEventListener('submit',e=>{e.preventDefault();this.login(Ui.el('loginSubmitBtn'))});Ui.el('loginFacility')?.addEventListener('change',()=>AppCore.previewLoginFacility());Ui.el('logoutBtn').addEventListener('click',e=>{const btn=e.currentTarget,go=()=>Ui.runButtonBusy(btn,()=>this.logout(true));if(SettingsModule.hasUnsavedChanges?.())SettingsModule.guardChanges(go);else go()});document.querySelectorAll('.staff-tab').forEach(b=>b.addEventListener('click',()=>this.openTab(b.dataset.tab)));document.querySelectorAll('.settings-nav [data-settings]').forEach(b=>b.addEventListener('click',()=>SettingsModule.openSection(b.dataset.settings)));document.querySelectorAll('[data-reject-menu]').forEach(b=>b.addEventListener('click',()=>SettingsModule.openRejectSub(b.dataset.rejectMenu)));document.querySelectorAll('[data-transport-menu]').forEach(b=>b.addEventListener('click',()=>SettingsModule.openTransportSub(b.dataset.transportMenu)));document.querySelectorAll('[data-receivepoint-menu]').forEach(b=>b.addEventListener('click',()=>SettingsModule.openReceivePointSub(b.dataset.receivepointMenu)));Ui.el('settingsRefreshBtn')?.addEventListener('click',e=>SettingsModule.refreshSettings(e.currentTarget));
+    Ui.show('publicSendPage',false);Ui.el('loginForm').addEventListener('submit',e=>{e.preventDefault();this.login(Ui.el('loginSubmitBtn'))});Ui.el('loginFacility')?.addEventListener('change',()=>{AppCore.previewLoginFacility();this.updateLoginButton()});Ui.el('logoutBtn').addEventListener('click',e=>{const btn=e.currentTarget,go=()=>Ui.runButtonBusy(btn,()=>this.logout(true));if(SettingsModule.hasUnsavedChanges?.())SettingsModule.guardChanges(go);else go()});document.querySelectorAll('.staff-tab').forEach(b=>b.addEventListener('click',()=>this.openTab(b.dataset.tab)));document.querySelectorAll('.settings-nav [data-settings]').forEach(b=>b.addEventListener('click',()=>SettingsModule.openSection(b.dataset.settings)));document.querySelectorAll('[data-reject-menu]').forEach(b=>b.addEventListener('click',()=>SettingsModule.openRejectSub(b.dataset.rejectMenu)));document.querySelectorAll('[data-transport-menu]').forEach(b=>b.addEventListener('click',()=>SettingsModule.openTransportSub(b.dataset.transportMenu)));document.querySelectorAll('[data-receivepoint-menu]').forEach(b=>b.addEventListener('click',()=>SettingsModule.openReceivePointSub(b.dataset.receivepointMenu)));Ui.el('settingsRefreshBtn')?.addEventListener('click',e=>SettingsModule.refreshSettings(e.currentTarget));
     if(State.token){await this.completeStaffLogin()}else this.showLogin();
   },
-  showLogin(){LoadingScreen.hide();Ui.el('app')?.classList.add('login-mode');Ui.show('staffLoginPage',true);Ui.show('staffAppPage',false);Ui.show('staffTabs',false);Ui.show('headerUser',false);AppCore.previewLoginFacility()},
+  showLogin(){LoadingScreen.hide();Ui.el('app')?.classList.add('login-mode');Ui.show('staffLoginPage',true);Ui.show('staffAppPage',false);Ui.show('staffTabs',false);Ui.show('headerUser',false);AppCore.previewLoginFacility();this.updateLoginButton()},
   authEpoch:0,
+  updateLoginButton(){const el=Ui.el('loginSubmitBtn')?.querySelector('.btn-busy-keep');if(el){const site=String(Ui.el('loginFacility')?.value||'').toUpperCase();el.textContent=State.token&&site===String(State.sessionSite||'').toUpperCase()?'TẢI LẠI DỮ LIỆU':'ĐĂNG NHẬP'}},
   sameAuthSession(epoch,token,site){return this.authEpoch===epoch&&!!token&&State.token===token&&String(State.sessionSite||State.user?.maCoSo||'').toUpperCase()===site},
   async login(btn){return Ui.runButtonBusy(btn||Ui.el('loginSubmitBtn'),async()=>{
+    const facilitySelect=Ui.el('loginFacility');
     try{
-      const site=String(Ui.el('loginFacility').value||'').toUpperCase();
+      const site=String(facilitySelect.value||'').toUpperCase();
       if(!site)throw new Error('Vui lòng chọn cơ sở.');
-      if(State.token&&String(State.sessionSite||'').toUpperCase()!==site){
+      const enteredEmployee=String(Ui.el('loginCode').value||'').trim();
+      const currentEmployee=String(State.user?.maNhanVien||'').trim();
+      const sameSite=String(State.sessionSite||'').toUpperCase()===site;
+      const sameAccount=!enteredEmployee||enteredEmployee===currentEmployee;
+      if(State.token&&(!sameSite||!sameAccount)){
         if(!await this.forceLogout(true))return;
       }
       if(!State.token){
@@ -611,26 +617,29 @@ const StaffApp={
         State.assignedReceivePoint=null;State.assignedReceivePoints=[];
         State.receivePointContext={pointId:'',pointType:'',sampleMode:''};
         const started=Date.now();
-        // Không tự gửi lại login khi timeout: backend có thể đã tạo phiên thành công.
-        const r=await ApiService.call('authLogin',{maCoSo:site,maNhanVien:Ui.el('loginCode').value.trim(),matKhau:Ui.el('loginPassword').value},{timeoutMs:30000});
+        // Không tự retry authLogin: request trước có thể đã tạo session.
+        facilitySelect.disabled=true;
+        const r=await ApiService.call('authLogin',{maCoSo:site,maNhanVien:enteredEmployee,matKhau:Ui.el('loginPassword').value},{timeoutMs:30000});
         console.info('[GM LOGIN] authLogin '+(Date.now()-started)+'ms');
         if(!r.data?.token||!r.data?.user)throw new Error('Máy chủ chưa trả đủ thông tin phiên đăng nhập.');
         this.authEpoch++;
         State.token=r.data.token;State.user=r.data.user;State.sessionSite=site;
         sessionStorage.setItem(SESSION_KEY,State.token);sessionStorage.setItem(SESSION_SITE_KEY,site);
+        Ui.el('loginPassword').value='';
       }else this.authEpoch++;
-      const ok=await this.completeStaffLogin();
-      if(ok)Ui.el('loginPassword').value='';
+      await this.completeStaffLogin();
     }catch(e){LoadingScreen.hide();Ui.toast(e.message,'error')}
+    finally{facilitySelect.disabled=false;this.updateLoginButton()}
   })},
-  async requestStaffPreload(payload){
-    // staffBootstrap xác thực quyền và danh mục nền; reject/consult/employees tải riêng khi cần.
+  async requestStaffPreload(payload,token,epoch,site){
+    // Giữ nguyên token trong tất cả các lần retry; không chuyển request cũ sang phiên mới.
     let lastError=null;
     for(let attempt=0;attempt<2;attempt++){
-      try{return await ApiService.auth('staffBootstrap',payload,{timeoutMs:STAFF_PRELOAD_TIMEOUT_MS})}
+      if(!this.sameAuthSession(epoch,token,site))return null;
+      try{return await ApiService.call('staffBootstrap',{...payload,token},{timeoutMs:STAFF_PRELOAD_TIMEOUT_MS})}
       catch(e){
         lastError=e;
-        if(attempt===0&&isRetryableApiError(e)){
+        if(attempt===0&&this.sameAuthSession(epoch,token,site)&&isRetryableApiError(e)){
           LoadingScreen.message('Kết nối chậm, đang thử tải lại cấu hình...','30%');
           await waitMs(900);continue;
         }
@@ -644,14 +653,15 @@ const StaffApp={
     if(!token||!site){this.showLogin();return false}
     LoadingScreen.show('Đang xác minh quyền và tải cấu hình thiết yếu...',10);
     const hasCache=AppCore.loadCache(site),userSpec=State.user?.maChuyenNganh||'';
-    const hasTransportCache=AppCore.hasTransportCache(userSpec);
+    // Khi khôi phục token, chưa biết chuyên ngành: tải lại phạm vi vận chuyển từ backend.
+    const hasTransportCache=!!userSpec&&AppCore.hasTransportCache(userSpec);
     LoadingScreen.set(3,10,'Đang tải cấu hình thiết yếu...');
     const started=Date.now();
     try{
-      const r=await this.requestStaffPreload({configVersion:State.configVersion,hasCatalogCache:hasCache,transportConfigVersion:State.transportConfigVersion,hasTransportCache});
+      const r=await this.requestStaffPreload({configVersion:State.configVersion,hasCatalogCache:hasCache,transportConfigVersion:State.transportConfigVersion,hasTransportCache},token,epoch,site);
       if(!this.sameAuthSession(epoch,token,site))return false;
       console.info('[GM LOGIN] staffBootstrap '+(Date.now()-started)+'ms');
-      if(!r.data?.user||!r.data?.permissions)throw new Error('Máy chủ chưa trả đủ dữ liệu phân quyền.');
+      if(!r?.data?.user||!r.data.permissions)throw new Error('Máy chủ chưa trả đủ dữ liệu phân quyền.');
       await this.enter(r.data,true);
       return true;
     }catch(e){
@@ -661,10 +671,10 @@ const StaffApp={
       if(/Phiên đăng nhập|Tài khoản đã bị khóa|không còn quyền/.test(msg)){
         await this.forceLogout(false);Ui.toast(msg,'error');return false;
       }
-      const shown=msg||'Không tải được cấu hình. Vui lòng thử lại.';
-      // Lỗi đọc danh mục không làm mất phiên đã xác thực.
-      LoadingScreen.fail(shown,()=>this.completeStaffLogin());
-      Ui.toast(shown,'error');return false;
+      // Giữ token hợp lệ, quay về form để thử tải lại hoặc đổi cơ sở.
+      this.showLogin();
+      Ui.toast((msg||'Không tải được cấu hình.')+' Nhấn TẢI LẠI DỮ LIỆU để thử lại.','error');
+      return false;
     }
   },
   applyPermissionUi(){const isAdmin=State.user?.vaiTro==='Admin',isManager=isAdmin||State.user?.vaiTro==='Quản lý',tabs=new Set(State.permissions?.tabsAllowed||[]),canReceive=isAdmin||tabs.has('RECEIVE'),canReject=isAdmin||tabs.has('REJECT'),canConsult=isAdmin||tabs.has('CONSULT');Ui.show('receiveTabBtn',canReceive);Ui.show('rejectTabBtn',canReject);Ui.show('consultTabBtn',canConsult);Ui.show('settingsTabBtn',true);Ui.show('receiveExcelBtn',canReceive&&(isAdmin||State.permissions?.canExportExcel));Ui.show('rejectExcelBtn',canReject&&(isAdmin||State.permissions?.canExportExcel));Ui.show('consultExcelBtn',canConsult&&(isAdmin||State.permissions?.canExportExcel));document.querySelectorAll('.admin-only').forEach(x=>x.classList.toggle('hidden',!isAdmin));document.querySelectorAll('.manager-only').forEach(x=>x.classList.toggle('hidden',!isManager));return{isAdmin,isManager,canReceive,canReject,canConsult}},
