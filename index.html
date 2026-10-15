@@ -345,7 +345,7 @@
 
 <script>
 /* ===== APP_CONFIG: START ===== */
-const APP_VERSION='81.51';
+const APP_VERSION='82.52';
 const API_URL='https://script.google.com/macros/s/AKfycbzajuPqWVK5K_GZ7Ab8b5qi7S1YfqffO5QFheoqJBBiFvvuqG1jo199n4-PvBOZgxP6Ew/exec';
 const CACHE_KEY_PUBLIC='GM_PUBLIC_CATALOG_CACHE_V7';
 const PUBLIC_RECHECK_MS=5*60*1000;
@@ -367,7 +367,7 @@ function patientBirthIso(v){const s=String(v||'').trim(),m=s.match(/^(\d{2})\/(\
 function displayPatientBirth(v){const s=String(v||'').trim(),m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?m[3]+'/'+m[2]+'/'+m[1]:s;}
 function bindPatientBirthInput(id){const el=Ui.el(id);if(!el||el.dataset.patientDateBound)return;el.dataset.patientDateBound='1';el.addEventListener('input',()=>{const raw=el.value,d=raw.replace(/\D/g,'').slice(0,8);if(!d)return;const out=d.slice(0,2)+(d.length>2?'/'+d.slice(2,4):'')+(d.length>4?'/'+d.slice(4):'');if(out!==raw)el.value=out;});}
 const CONSULT_QUEUE_SCHEMA=2;
-const STAFF_PRELOAD_TIMEOUT_MS=30000;
+const STAFF_PRELOAD_TIMEOUT_MS=90000;
 const SETTINGS_PRELOAD_TIMEOUT_MS=45000;
 const API_SCHEMA_VERSION=17;
 const TRANSPORT_RETRY_DELAYS=[1500,3500,7000];
@@ -670,7 +670,10 @@ const StaffApp={
       try{return await ApiService.call('staffPreload',{...payload,token},{timeoutMs:STAFF_PRELOAD_TIMEOUT_MS})}
       catch(e){
         lastError=e;
-        if(attempt>=2||!isRetryableApiError(e)||!this.sameAuthSession(epoch,token,site))break;
+        // AbortController only stops waiting on the browser; Apps Script may still be running.
+        // Never issue overlapping expensive preload calls after an unknown server-side timeout.
+        if(/Quá thời gian tải dữ liệu từ máy chủ/i.test(String(e?.message||''))||
+           attempt>=2||!isRetryableApiError(e)||!this.sameAuthSession(epoch,token,site))break;
         LoadingScreen.message('Đang tải dữ liệu...');
         await waitMs(retryDelayMs([900,1800][attempt]));
       }
@@ -740,7 +743,7 @@ const StaffApp={
         LoadingScreen.fail('Không có kết nối Internet. Vui lòng kiểm tra mạng.',()=>this.completeStaffLogin());
       }else{
         // Chỉ báo lỗi thực sự không thể tự khắc phục; không yêu cầu thử lại khi lỗi API tạm thời.
-        LoadingScreen.fail((isRetryableApiError(e)?'Máy chủ chưa phản hồi sau 3 lần tự thử lại. ':
+        LoadingScreen.fail((isRetryableApiError(e)?'Máy chủ chưa hoàn tất tải dữ liệu. ':
           'Không thể khởi tạo phiên làm việc. ')+msg+' Vui lòng liên hệ quản trị viên.',null);
       }
       return false;
