@@ -95,9 +95,9 @@
     .stats-scroll{overflow:auto;flex:1;min-height:0;border:1px solid var(--gm-border)}
     .stats-table{border-collapse:separate;border-spacing:0;width:100%;font-size:12px}
     .stats-table th,.stats-table td{border-right:1px solid var(--gm-border);border-bottom:1px solid var(--gm-border);padding:8px 10px;text-align:right;white-space:nowrap}
-    .stats-table thead th{position:sticky;top:0;background:#e6f4ea;z-index:2;color:#0b6535}
-    .stats-table thead tr:nth-child(2) th{top:35px}
-    .stats-table .stats-name{text-align:left;min-width:190px;white-space:normal}
+    .stats-table thead th{position:sticky;top:0;background:#e6f4ea;z-index:2;color:#0b6535;text-align:center;vertical-align:middle;white-space:normal;line-height:1.25}
+    .stats-table thead tr:first-child{height:48px}.stats-table thead tr:nth-child(2) th{top:48px}
+    .stats-table .stats-name{text-align:left;min-width:190px;white-space:normal}.stats-table thead .stats-name{text-align:center}
     .stats-table tfoot th,.stats-table tfoot td{font-weight:700;background:#e6f4ea;position:sticky;bottom:0}
     .stats-result-note{margin-top:8px;color:var(--gm-sub);font-size:12px}
     .stats-empty{text-align:center;padding:24px;color:var(--gm-sub)}
@@ -382,7 +382,7 @@
 
 <script>
 /* ===== APP_CONFIG: START ===== */
-const APP_VERSION='87.59';
+const APP_VERSION='88.63';
 const API_URL='https://script.google.com/macros/s/AKfycbzajuPqWVK5K_GZ7Ab8b5qi7S1YfqffO5QFheoqJBBiFvvuqG1jo199n4-PvBOZgxP6Ew/exec';
 const CACHE_KEY_PUBLIC='GM_PUBLIC_CATALOG_CACHE_V7';
 const PUBLIC_RECHECK_MS=5*60*1000;
@@ -1750,25 +1750,27 @@ const StatisticsModule={
   renderEmpty(text){Ui.el('statsResult').innerHTML='<div class="stats-empty">'+Ui.esc(text||'Chọn bộ lọc và nhấn XEM THỐNG KÊ.')+'</div>';Ui.el('statsReportMeta').textContent='';Ui.el('statsFootnote').textContent='';Ui.show('statsExcel',false);},
   number(n){return (Number(n)||0).toLocaleString('vi-VN')},
   tat(n){return n===null||n===undefined?'—':Number(n).toLocaleString('vi-VN',{maximumFractionDigits:2})},
+  tatRate(n){return n===null||n===undefined?'—':Number(n).toLocaleString('vi-VN',{minimumFractionDigits:2,maximumFractionDigits:2})+'%'},
   renderTable(){const d=this.result;if(!d)return this.renderEmpty();const isConsult=d.kind==='CONSULT';let html='<table class="stats-table"><thead>';
-    if(isConsult){html+='<tr><th rowspan="2">STT</th><th class="stats-name" rowspan="2">Viện/TT/Khoa chỉ định</th>'+(d.columns||[]).map(c=>'<th colspan="2">'+Ui.esc(c.label)+'</th>').join('')+'<th colspan="2">TỔNG</th></tr><tr>'+(d.columns||[]).map(()=>'<th>Số hồ sơ</th><th>TAT TB (phút)</th>').join('')+'<th>Số hồ sơ</th><th>TAT TB (phút)</th></tr>';}
+    if(isConsult){html+='<tr><th rowspan="2">STT</th><th class="stats-name" rowspan="2">Viện/TT/Khoa chỉ định</th>'+(d.columns||[]).map(c=>'<th colspan="2">'+Ui.esc(c.label)+'</th>').join('')+'<th colspan="4">TỔNG</th></tr><tr>'+(d.columns||[]).map(()=>'<th>Số hồ sơ</th><th>TAT TB (phút)</th>').join('')+'<th>Số hồ sơ</th><th>TAT TB (phút)</th><th>TAT ≤15′</th><th>Tỷ lệ TAT ≤15′</th></tr>';}
     else html+='<tr><th>STT</th><th class="stats-name">Viện/TT/Khoa chỉ định</th>'+(d.columns||[]).map(c=>'<th>'+Ui.esc(c.label)+'</th>').join('')+'<th>TỔNG</th></tr>';
     html+='</thead><tbody>';
     (d.rows||[]).forEach((r,i)=>{html+='<tr><td>'+(i+1)+'</td><td class="stats-name">'+Ui.esc(r.unitName||r.unitId)+'</td>';
       (d.columns||[]).forEach(c=>{html+='<td>'+this.number(r.values?.[c.key])+'</td>';if(isConsult)html+='<td>'+this.tat(r.typeTat?.[c.key])+'</td>';});
-      html+='<td><strong>'+this.number(r.total)+'</strong></td>'+(isConsult?'<td>'+this.tat(r.tatMinutes)+'</td>':'')+'</tr>';
+      html+='<td><strong>'+this.number(r.total)+'</strong></td>'+(isConsult?'<td>'+this.tat(r.tatMinutes)+'</td><td>'+this.number(r.tatLe15Count)+'</td><td>'+this.tatRate(r.tatLe15Rate)+'</td>':'')+'</tr>';
     });html+='</tbody><tfoot><tr><th colspan="2" class="stats-name">TỔNG CHUNG</th>';
     (d.columns||[]).forEach(c=>{html+='<td>'+this.number(d.totals?.values?.[c.key])+'</td>';if(isConsult)html+='<td>'+this.tat(d.totals?.typeTat?.[c.key])+'</td>';});
-    html+='<td>'+this.number(d.totals?.total)+'</td>'+(isConsult?'<td>'+this.tat(d.totals?.tatMinutes)+'</td>':'')+'</tr></tfoot></table>';
+    html+='<td>'+this.number(d.totals?.total)+'</td>'+(isConsult?'<td>'+this.tat(d.totals?.tatMinutes)+'</td><td>'+this.number(d.totals?.tatLe15Count)+'</td><td>'+this.tatRate(d.totals?.tatLe15Rate)+'</td>':'')+'</tr></tfoot></table>';
     Ui.el('statsResult').innerHTML=html;Ui.el('statsReportMeta').textContent=`${d.fromTime.replace('T',' ')} – ${d.toTime.replace('T',' ')} · ${d.site}`;
     Ui.el('statsFootnote').textContent=isConsult?'Tổng = số hồ sơ không trùng. TAT tính theo các hồ sơ có thời gian hợp lệ (phút), không lấy trung bình các giá trị trung bình.':'Đơn vị: '+(d.kind==='REJECT'?'ca từ chối':'mẫu')+'; số liệu chỉ gồm phiếu đã đồng bộ.';
     Ui.show('statsExcel',!!State.permissions?.canExportExcel||State.user?.vaiTro==='Admin');
   },
   async exportExcel(){if(!this.result)return Ui.toast('Chưa có kết quả thống kê.','error');if(!State.permissions?.canExportExcel&&State.user?.vaiTro!=='Admin')return Ui.toast('Tài khoản chưa được phân quyền xuất Excel.','error');
-    const xlsx=await SettingsModule.ensureXlsx(),d=this.result,isConsult=d.kind==='CONSULT',cols=d.columns||[],headers=['STT','Viện/TT/Khoa chỉ định'];cols.forEach(c=>{headers.push(c.label);if(isConsult)headers.push(c.label+' – TAT TB (phút)');});headers.push('Tổng'+(isConsult?' hồ sơ':''));if(isConsult)headers.push('TAT TB chung (phút)');
-    const rows=(d.rows||[]).map((r,i)=>{const arr=[i+1,r.unitName||r.unitId];cols.forEach(c=>{arr.push(r.values?.[c.key]||0);if(isConsult)arr.push(r.typeTat?.[c.key]??'');});arr.push(r.total);if(isConsult)arr.push(r.tatMinutes??'');return arr;});
-    const footer=['','TỔNG CHUNG'];cols.forEach(c=>{footer.push(d.totals?.values?.[c.key]||0);if(isConsult)footer.push(d.totals?.typeTat?.[c.key]??'');});footer.push(d.totals?.total||0);if(isConsult)footer.push(d.totals?.tatMinutes??'');
-    const ws=xlsx.utils.aoa_to_sheet([['THỐNG KÊ '+d.kind],['Từ',d.fromTime,'Đến',d.toTime],[],headers,...rows,footer]),wb=xlsx.utils.book_new();xlsx.utils.book_append_sheet(wb,ws,'THONG_KE');xlsx.writeFile(wb,'Thong_ke_'+d.kind+'_'+d.site+'_'+d.fromTime.slice(0,10)+'_'+d.toTime.slice(0,10)+'.xlsx');
+    const xlsx=await SettingsModule.ensureXlsx(),d=this.result,isConsult=d.kind==='CONSULT',cols=d.columns||[],headers=['STT','Viện/TT/Khoa chỉ định'];cols.forEach(c=>{headers.push(c.label);if(isConsult)headers.push(c.label+' – TAT TB (phút)');});headers.push('Tổng'+(isConsult?' hồ sơ':''));if(isConsult)headers.push('TAT TB chung (phút)','TAT ≤15′','Tỷ lệ TAT ≤15′ (%)');
+    const rows=(d.rows||[]).map((r,i)=>{const arr=[i+1,r.unitName||r.unitId];cols.forEach(c=>{arr.push(r.values?.[c.key]||0);if(isConsult)arr.push(r.typeTat?.[c.key]??'');});arr.push(r.total);if(isConsult)arr.push(r.tatMinutes??'',r.tatLe15Count||0,r.tatLe15Rate??'');return arr;});
+    const footer=['','TỔNG CHUNG'];cols.forEach(c=>{footer.push(d.totals?.values?.[c.key]||0);if(isConsult)footer.push(d.totals?.typeTat?.[c.key]??'');});footer.push(d.totals?.total||0);if(isConsult)footer.push(d.totals?.tatMinutes??'',d.totals?.tatLe15Count||0,d.totals?.tatLe15Rate??'');
+    const ws=xlsx.utils.aoa_to_sheet([['THỐNG KÊ '+d.kind],['Từ',d.fromTime,'Đến',d.toTime],[],headers,...rows,footer]),wb=xlsx.utils.book_new();
+    for(let c=0;c<headers.length;c++){const cell=ws[xlsx.utils.encode_cell({r:3,c})];if(cell)cell.s={alignment:{horizontal:'center',vertical:'center',wrapText:true}};}xlsx.utils.book_append_sheet(wb,ws,'THONG_KE');xlsx.writeFile(wb,'Thong_ke_'+d.kind+'_'+d.site+'_'+d.fromTime.slice(0,10)+'_'+d.toTime.slice(0,10)+'.xlsx');
   }
 };
 /* ===== STATISTICS_FRONTEND_V1: END ===== */
