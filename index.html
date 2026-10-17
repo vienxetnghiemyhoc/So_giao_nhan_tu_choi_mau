@@ -305,6 +305,21 @@
       @page{size:A4 landscape;margin:9mm 8mm 13mm;@bottom-left{content:'BM.05.QL12';font:12pt 'Times New Roman'}@bottom-right{content:'Trang ' counter(page) '/' counter(pages);font:12pt 'Times New Roman'}}
       #gmPrintHost .gm-report-paper{font-size:12pt!important}
     }
+
+    /* 99.69: Cân đối SID 12 số, không xuống dòng tên ngày sinh ở hai form */
+    #rejectPage .reject-birth-sid-row,#consultPage .reject-birth-sid-row{grid-template-columns:minmax(165px,1.42fr) minmax(130px,1fr);gap:8px;align-items:end}
+    #rejectPage .reject-birth-sid-row>.field,#consultPage .reject-birth-sid-row>.field{min-width:0}
+    #rejectPage .reject-birth-sid-row>.field:first-child>label,#consultPage .reject-birth-sid-row>.field:first-child>label{font-size:12px;white-space:nowrap;line-height:1.15;min-height:19px;letter-spacing:0}
+    #rejectSid,#consultSid{font-variant-numeric:tabular-nums;min-width:0;width:100%}
+    @media(max-width:370px){#rejectPage .reject-birth-sid-row,#consultPage .reject-birth-sid-row{grid-template-columns:minmax(0,1fr)}}
+    /* 99.69: Báo cáo Từ chối: thông tin đơn vị, bảng 2–3, ngày và bốn chữ ký */
+    .gm-report-paper .gm-report-header{font-size:11px;line-height:1.2}
+    .gm-report-paper .gm-signatures>div>.gm-sign-date{font-style:italic;line-height:1.15;margin:0}
+    .gm-report-paper .gm-signatures>div>.gm-sign-role{display:block;line-height:1.15}
+    .gm-report-paper .gm-signature-space{height:90px}
+    #reportPreview .gm-report-conclusions th,#reportPreview .gm-report-conclusions td,
+    #gmPrintHost .gm-report-conclusions th,#gmPrintHost .gm-report-conclusions td,
+    .gm-pdf-paper .gm-report-conclusions th,.gm-pdf-paper .gm-report-conclusions td{font-size:12px!important}
   </style>
 </head>
 <body>
@@ -379,6 +394,19 @@
       </div>
     </section>
 
+
+    <section id="forceChangePasswordPage" class="staff-login-wrap hidden">
+      <div class="card card-pad staff-login-card" style="max-width:460px;min-height:0">
+        <h2 class="card-title">ĐỔI MẬT KHẨU BẮT BUỘC</h2>
+        <p class="small muted">Mật khẩu mặc định là Mã nhân viên. Bạn phải đặt mật khẩu mới trước khi sử dụng ứng dụng.</p>
+        <form id="forceChangePasswordForm" class="form-stack">
+          <div class="field"><label for="forcePasswordCurrent">Mật khẩu hiện tại</label><input id="forcePasswordCurrent" class="control" type="password" autocomplete="current-password" required></div>
+          <div class="field"><label for="forcePasswordNew">Mật khẩu mới (tối thiểu 8 ký tự)</label><input id="forcePasswordNew" class="control" type="password" autocomplete="new-password" minlength="8" required></div>
+          <div class="field"><label for="forcePasswordConfirm">Nhập lại mật khẩu mới</label><input id="forcePasswordConfirm" class="control" type="password" autocomplete="new-password" minlength="8" required></div>
+          <div class="actions"><button id="forcePasswordSave" class="btn btn-primary" type="submit">ĐỔI MẬT KHẨU</button><button id="forcePasswordLogout" class="btn btn-outline" type="button">ĐĂNG XUẤT</button></div>
+        </form>
+      </div>
+    </section>
     <section id="staffLoginPage" class="staff-login-wrap">
       <div class="card card-pad staff-login-card">
         <div class="login-brand-block">
@@ -615,13 +643,13 @@
     </section>
   </main>
 
-  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 95.65</footer>
+  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 99.69</footer>
 </div>
 <div id="modalRoot"></div><div id="toastWrap" class="toast-wrap"></div><div id="spinner" class="spinner-overlay hidden"><div class="spinner"></div></div>
 
 <script>
 /* ===== APP_CONFIG: START ===== */
-const APP_VERSION='98.68';
+const APP_VERSION='99.69';
 const API_URL='https://script.google.com/macros/s/AKfycbzajuPqWVK5K_GZ7Ab8b5qi7S1YfqffO5QFheoqJBBiFvvuqG1jo199n4-PvBOZgxP6Ew/exec';
 const CACHE_KEY_PUBLIC='GM_PUBLIC_CATALOG_CACHE_V7';
 const PUBLIC_RECHECK_MS=5*60*1000;
@@ -903,9 +931,12 @@ const PublicSendApp={
 const StaffApp={
   async init(){
     Ui.show('publicSendPage',false);Ui.el('loginForm').addEventListener('submit',e=>{e.preventDefault();this.login(Ui.el('loginSubmitBtn'))});Ui.el('loginFacility')?.addEventListener('change',()=>{AppCore.previewLoginFacility();this.updateLoginButton()});Ui.el('logoutBtn').addEventListener('click',e=>{const btn=e.currentTarget,go=()=>Ui.runButtonBusy(btn,()=>this.logout(true));if(SettingsModule.hasUnsavedChanges?.())SettingsModule.guardChanges(go);else go()});Ui.el('gmMenuToggle').addEventListener('click',e=>{e.stopPropagation();const panel=Ui.el('gmMenuPanel');if(panel.classList.contains('hidden'))this.positionMenu();panel.classList.toggle('hidden');e.currentTarget.setAttribute('aria-expanded',String(!panel.classList.contains('hidden')))});window.addEventListener('resize',()=>{if(!Ui.el('gmMenuPanel').classList.contains('hidden'))this.positionMenu()});Ui.el('gmMenuPanel').addEventListener('click',e=>{const b=e.target.closest('[data-open-module]');if(b)this.openTab(b.dataset.openModule)});Ui.el('gmOpenTabs').addEventListener('click',e=>{const close=e.target.closest('[data-close-module]'),open=e.target.closest('[data-tab]');if(close){e.stopPropagation();this.closeTab(close.dataset.closeModule)}else if(open)this.openTab(open.dataset.tab)});document.addEventListener('pointerdown',e=>{if(!e.target.closest('#gmMenuPanel,#gmMenuToggle')){Ui.el('gmMenuPanel')?.classList.add('hidden');Ui.el('gmMenuToggle')?.setAttribute('aria-expanded','false')}});document.addEventListener('keydown',e=>{if(e.key==='Escape'){Ui.el('gmMenuPanel')?.classList.add('hidden');Ui.el('gmMenuToggle')?.setAttribute('aria-expanded','false')}});document.querySelectorAll('.settings-nav [data-settings]').forEach(b=>b.addEventListener('click',()=>SettingsModule.openSection(b.dataset.settings)));document.querySelectorAll('[data-reject-menu]').forEach(b=>b.addEventListener('click',()=>SettingsModule.openRejectSub(b.dataset.rejectMenu)));document.querySelectorAll('[data-transport-menu]').forEach(b=>b.addEventListener('click',()=>SettingsModule.openTransportSub(b.dataset.transportMenu)));document.querySelectorAll('[data-receivepoint-menu]').forEach(b=>b.addEventListener('click',()=>SettingsModule.openReceivePointSub(b.dataset.receivepointMenu)));Ui.el('settingsRefreshBtn')?.addEventListener('click',e=>SettingsModule.refreshSettings(e.currentTarget));
-    if(State.token){await this.completeStaffLogin()}else this.showLogin();
+    Ui.el('forceChangePasswordForm').addEventListener('submit',e=>{e.preventDefault();this.submitRequiredPasswordChange()});Ui.el('forcePasswordLogout').addEventListener('click',()=>this.logout(true));
+    if(State.token){try{const c=await ApiService.auth('authCheck',{});if(c.data?.mustChangePassword){this.showRequiredPasswordChange();return}}catch(e){await this.logout(false);return}await this.completeStaffLogin()}else this.showLogin();
   },
-  showLogin(){LoadingScreen.hide();Ui.el('app')?.classList.add('login-mode');Ui.show('staffLoginPage',true);Ui.show('staffAppPage',false);Ui.show('staffTabs',false);Ui.show('headerUser',false);AppCore.previewLoginFacility();this.updateLoginButton()},
+  showRequiredPasswordChange(){LoadingScreen.hide();Ui.el('app')?.classList.add('login-mode');Ui.show('publicSendPage',false);Ui.show('staffLoginPage',false);Ui.show('staffAppPage',false);Ui.show('forceChangePasswordPage',true);Ui.show('staffTabs',false);Ui.show('headerUser',false);},
+  async submitRequiredPasswordChange(){const current=Ui.el('forcePasswordCurrent').value,next=Ui.el('forcePasswordNew').value,confirm=Ui.el('forcePasswordConfirm').value;if(next!==confirm)return Ui.toast('Mật khẩu nhập lại không khớp.','error');return Ui.runButtonBusy(Ui.el('forcePasswordSave'),async()=>{try{await ApiService.auth('settingsChangePassword',{currentPassword:current,newPassword:next});['forcePasswordCurrent','forcePasswordNew','forcePasswordConfirm'].forEach(id=>Ui.el(id).value='');Ui.show('forceChangePasswordPage',false);await this.completeStaffLogin();Ui.toast('Đổi mật khẩu thành công.','success')}catch(e){Ui.toast(e.message||'Không đổi được mật khẩu.','error')}});},
+  showLogin(){Ui.show('forceChangePasswordPage',false);LoadingScreen.hide();Ui.el('app')?.classList.add('login-mode');Ui.show('staffLoginPage',true);Ui.show('staffAppPage',false);Ui.show('staffTabs',false);Ui.show('headerUser',false);AppCore.previewLoginFacility();this.updateLoginButton()},
   authEpoch:0,
   sameQueueSession(token,site,employee){return !!token&&State.token===token&&String(State.user?.maCoSo||'')===String(site||'')&&String(State.user?.maNhanVien||'')===String(employee||'')},
   updateLoginButton(){const label=Ui.el('loginSubmitBtn')?.querySelector('.btn-busy-keep');if(label){const site=String(Ui.el('loginFacility')?.value||'').toUpperCase();label.textContent=State.token&&site===String(State.sessionSite||'').toUpperCase()?'TẢI LẠI DỮ LIỆU':'ĐĂNG NHẬP'}},
@@ -932,12 +963,12 @@ const StaffApp={
         console.info('[GM AUTH] login: '+(Date.now()-started)+'ms');
         if(!r.data?.token||!r.data?.user)throw new Error('Máy chủ chưa trả đủ dữ liệu phiên đăng nhập.');
         if(String(r.data.user.maCoSo||'').toUpperCase()!==site)throw new Error('Cơ sở trả về từ máy chủ không khớp cơ sở đăng nhập.');
-        this.authEpoch++;
+        this.authEpoch++;this.mustChangePassword=!!r.data.mustChangePassword;
         State.token=r.data.token;State.user=r.data.user;State.sessionSite=site;
         sessionStorage.setItem(SESSION_KEY,State.token);sessionStorage.setItem(SESSION_SITE_KEY,site);
         Ui.el('loginPassword').value='';
       }else this.authEpoch++;
-      await this.completeStaffLogin();
+      if(!State.token)return;if(this.mustChangePassword){this.showRequiredPasswordChange();return}await this.completeStaffLogin();
     }catch(e){LoadingScreen.hide();Ui.toast(e.message,'error')}
     finally{facilitySelect.disabled=false;this.updateLoginButton()}
   })},
@@ -2102,10 +2133,10 @@ const RejectReportModule={
     const totalCases=reasonIds.map(code=>totalReason(totalTypes,code)),totalRow=`<tr class="gm-report-grand"><td></td><td class="gm-report-left"><strong>TỔNG CỘNG</strong></td><td><strong>${isValid(d.totalSamples)?num(d.totalSamples):'Chưa đủ'}</strong></td><td><strong>${num(d.totalRejected)}</strong></td><td><strong>${pct(d.totalRejected,d.totalSamples)}</strong></td><td>—</td>${totalCases.map(n=>`<td><strong>${this.displayValue(n,d.totalRejected)}</strong></td>`).join('')}<td><strong>${this.displayValue(d.totalRejected,d.totalRejected)}</strong></td></tr>`;
     const top=visible.filter(r=>r.totalSamples>0&&r.rejected>0).slice().sort((a,b)=>(b.rejected/b.totalSamples-a.rejected/a.totalSamples)||b.rejected-a.rejected).slice(0,10);
     const causes=reasonIds.filter(key=>totalReason(totalTypes,key)>0).map((key,i)=>`<tr><td class="gm-report-stt">${i+1}</td><td class="gm-report-left">${esc(reasonName[key]||key)}</td><td>${pct(totalReason(totalTypes,key),d.totalSamples)}</td><td class="gm-report-left">${esc(reasonOpts.find(x=>x.code===key)?.nguyenNhan||'—')}</td></tr>`).join('');
-    const meta=this.meta(),signatures=[['NGƯỜI LẬP BẢNG',d.creator?.name||'',''],['NGƯỜI BÁO CÁO',this.nameFor(meta.reporterId),meta.reportDate],['NGƯỜI XEM XÉT',this.nameFor(meta.reviewerId),meta.reviewDate],['NGƯỜI PHÊ DUYỆT',this.nameFor(meta.approverId),meta.approveDate]];
+    const meta=this.meta(),signatures=[['NGƯỜI LẬP BẢNG',d.creator?.name||'',meta.reportDate||d.to],['NGƯỜI BÁO CÁO',this.nameFor(meta.reporterId),meta.reportDate],['NGƯỜI XEM XÉT',this.nameFor(meta.reviewerId),meta.reviewDate],['NGƯỜI PHÊ DUYỆT',this.nameFor(meta.approverId),meta.approveDate]];
     const date=iso=>iso?.split('-').reverse().join('/')||'',rstatus=d.totalSamples===null?'Chưa đủ số liệu':pct(d.totalRejected,d.totalSamples),status=d.totalSamples===null?'Chưa đủ số liệu':d.thresholdPct==null?'Chưa cấu hình ngưỡng':(d.totalSamples>0&&d.totalRejected*100/d.totalSamples<=d.thresholdPct?'Đạt':'Không đạt');
     const site=d.site==='CSHN'?'HÀ NỘI':d.site==='CSNB'?'NINH BÌNH':d.siteName||d.site;const spec=String(d.specialtyName||'').trim(),unit=/^(KHOA|VIỆN|TRUNG TÂM|PHÒNG)\b/i.test(spec)?spec:'KHOA '+spec;
-    return `<div class="gm-report-header"><strong>BỆNH VIỆN BẠCH MAI CƠ SỞ ${esc(site).toLocaleUpperCase('vi')}</strong><div><strong>${esc(unit.toLocaleUpperCase('vi'))}</strong></div></div><h2>BÁO CÁO TỔNG KẾT MẪU BỆNH PHẨM KHÔNG PHÙ HỢP THÁNG ${d.month} NĂM ${d.year}</h2><p class="gm-report-period">Từ ${date(d.from)} đến ${date(d.to)}</p><h3>I. SỐ LIỆU TỪ CHỐI MẪU</h3><div class="gm-report-data-wrap"><table class="gm-report-data">${headings}<tbody>${rows||`<tr><td colspan="${reasonIds.length+7}">Không có số liệu trong kỳ.</td></tr>`}${totalRow}</tbody></table></div><h3>II. KẾT LUẬN</h3><p><strong>1. Tỷ lệ từ chối mẫu:</strong> Tỷ lệ từ chối mẫu xét nghiệm ${esc(d.specialtyName)} tháng ${d.month} năm ${d.year} là <strong>${rstatus}</strong> — <strong>${status}</strong>.</p><p><strong>2. Lý do và nguyên nhân từ chối mẫu:</strong></p><table class="gm-report-conclusions"><thead><tr><th class="gm-report-stt">STT</th><th style="width:32%">Tên lý do</th><th style="width:13%">Tỷ lệ từ chối</th><th>Nguyên nhân</th></tr></thead><tbody>${causes||'<tr><td colspan="4">Không có mẫu từ chối.</td></tr>'}</tbody></table><p><strong>3. Các khoa lâm sàng có tỷ lệ từ chối mẫu cao:</strong></p><table class="gm-report-conclusions gm-report-topunits"><thead><tr><th class="gm-report-stt">STT</th><th>Khoa lâm sàng</th><th>Số mẫu từ chối</th><th>Tổng mẫu</th><th>Tỷ lệ</th></tr></thead><tbody>${top.map((r,i)=>`<tr><td class="gm-report-stt">${i+1}</td><td class="gm-report-left">${esc(r.unitName)}</td><td>${num(r.rejected)}</td><td>${num(r.totalSamples)}</td><td>${pct(r.rejected,r.totalSamples)}</td></tr>`).join('')||'<tr><td colspan="5">Không có dữ liệu.</td></tr>'}</tbody></table><p><strong>4. Hành động khắc phục đề xuất:</strong></p><p style="white-space:pre-wrap">${esc(this.meta().actionPlan)||' '}</p><p><strong>5. Theo dõi hành động khắc phục:</strong></p><p style="white-space:pre-wrap">${esc(this.meta().followup)||' '}</p><div class="gm-signatures">${signatures.map(([role,name,signDate])=>`<div><div>${signDate?'Ngày '+date(signDate):'&nbsp;'}</div><strong>${esc(role)}</strong><div class="gm-signature-space"></div><strong>${esc(name)}</strong></div>`).join('')}</div>`
+    return `<div class="gm-report-header"><strong>BỆNH VIỆN BẠCH MAI CƠ SỞ ${esc(site).toLocaleUpperCase('vi')}</strong><div><strong>${esc(unit.toLocaleUpperCase('vi'))}</strong></div></div><h2>BÁO CÁO TỔNG KẾT MẪU BỆNH PHẨM KHÔNG PHÙ HỢP THÁNG ${d.month} NĂM ${d.year}</h2><p class="gm-report-period">Từ ${date(d.from)} đến ${date(d.to)}</p><h3>I. SỐ LIỆU TỪ CHỐI MẪU</h3><div class="gm-report-data-wrap"><table class="gm-report-data">${headings}<tbody>${rows||`<tr><td colspan="${reasonIds.length+7}">Không có số liệu trong kỳ.</td></tr>`}${totalRow}</tbody></table></div><h3>II. KẾT LUẬN</h3><p><strong>1. Tỷ lệ từ chối mẫu:</strong> Tỷ lệ từ chối mẫu xét nghiệm ${esc(d.specialtyName)} tháng ${d.month} năm ${d.year} là <strong>${rstatus}</strong> — <strong>${status}</strong>.</p><p><strong>2. Lý do và nguyên nhân từ chối mẫu:</strong></p><table class="gm-report-conclusions"><thead><tr><th class="gm-report-stt">STT</th><th style="width:32%">Tên lý do</th><th style="width:13%">Tỷ lệ từ chối</th><th>Nguyên nhân</th></tr></thead><tbody>${causes||'<tr><td colspan="4">Không có mẫu từ chối.</td></tr>'}</tbody></table><p><strong>3. Các khoa lâm sàng có tỷ lệ từ chối mẫu cao:</strong></p><table class="gm-report-conclusions gm-report-topunits"><thead><tr><th class="gm-report-stt">STT</th><th>Khoa lâm sàng</th><th>Số mẫu từ chối</th><th>Tổng mẫu</th><th>Tỷ lệ</th></tr></thead><tbody>${top.map((r,i)=>`<tr><td class="gm-report-stt">${i+1}</td><td class="gm-report-left">${esc(r.unitName)}</td><td>${num(r.rejected)}</td><td>${num(r.totalSamples)}</td><td>${pct(r.rejected,r.totalSamples)}</td></tr>`).join('')||'<tr><td colspan="5">Không có dữ liệu.</td></tr>'}</tbody></table><p><strong>4. Hành động khắc phục đề xuất:</strong></p><p style="white-space:pre-wrap">${esc(this.meta().actionPlan)||' '}</p><p><strong>5. Theo dõi hành động khắc phục:</strong></p><p style="white-space:pre-wrap">${esc(this.meta().followup)||' '}</p><div class="gm-signatures">${signatures.map(([role,name,signDate])=>`<div><div class="gm-sign-date">${signDate?'Ngày '+date(signDate):'&nbsp;'}</div><strong class="gm-sign-role">${esc(role)}</strong><div class="gm-signature-space"></div><strong>${esc(name)}</strong></div>`).join('')}</div>`
 
   },
   async print(){if(!this.result)return Ui.toast('Chưa tải báo cáo để in.','error');const host=document.createElement('div');host.id='gmPrintHost';try{host.innerHTML=`<div class="gm-report-paper">${this.renderHTML()}</div>`;document.body.appendChild(host);document.body.classList.add('gm-print-report');const end=()=>{document.body.classList.remove('gm-print-report');host.remove();window.removeEventListener('afterprint',end)};window.addEventListener('afterprint',end,{once:true});await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));window.print();}catch(e){document.body.classList.remove('gm-print-report');host.remove();Ui.toast(e.message||'Không mở được bản in.','error')}},
