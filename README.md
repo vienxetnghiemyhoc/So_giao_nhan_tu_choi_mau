@@ -1,29 +1,18 @@
-# Sổ giao nhận / từ chối mẫu – v61.43
+# Sổ Giao nhận – Từ chối – Tư vấn mẫu – Bệnh viện Bạch Mai
 
-Bản sửa lỗi chuyển phiên giữa hai cơ sở trên nền v60.42.
+## Phiên bản 99.69 / 79.69 (API 17)
 
-## Phiên bản
-- Frontend: **61** (`index.html` / `index 61.43.html`)
-- Backend: **43** (`Code 61.43.gs`)
-- API schema: **16** (không đổi schema dữ liệu)
+Frontend: 99.69; backend Apps Script: 79.69. Chỉnh sửa từ bản 98.68 / 78.68, không đổi schema dữ liệu hoặc tên các Sheet.
 
-## Nội dung sửa
-1. Chuẩn hóa logout/chuyển cơ sở:
-   - Giữ nguyên cơ chế đồng bộ queue trước logout.
-   - Sau `authLogout`, xóa toàn bộ runtime context của user/cơ sở cũ: catalog đang dùng, config/transport version tạm, điểm tiếp nhận, PointType/SampleMode, requestId, module state và prefetch promise.
-   - Cache catalog vẫn lưu riêng theo `MaCoSo`; login cơ sở mới chỉ đọc đúng cache của cơ sở đó.
-2. `loadCache()` luôn reset runtime trước khi nạp cache của cơ sở mới; cache thiếu/sai schema không còn để state cơ sở trước rơi sang cơ sở sau.
-3. `staffPreload` và `staffBootstrap` không tải cấu hình vận chuyển trong request login/bootstrap.
-   - Transport lazy-load riêng qua `staffTransportCatalogs` sau khi app đã vào màn hình chính.
-   - Response transport của phiên cũ bị bỏ qua nếu user/cơ sở đã thay đổi.
-4. Khi `TRANSPORT_CONFIG_VERSION` thay đổi, cache transport cũ bị đánh dấu invalid và tự tải lại.
-5. Tối ưu backend:
-   - `getActiveReceivePointAssignments_()` chỉ đọc các sheet cần thiết, không kéo toàn bộ catalog nhóm xét nghiệm để xác định điểm được phân công.
-   - `getTestGroupsForSite_()` batch-read Master/Applicability một lần thay vì đọc lặp theo từng chuyên ngành.
+- LOCAL mới/reset: mật khẩu ban đầu là mã nhân viên; bắt buộc đổi sau khi đăng nhập, chặn chức năng khác tại backend. SHARED_HHTM giữ nguyên.
+- Kiểm soát dữ liệu công khai (giới hạn số mẫu bằng cấu hình, giảm nguy cơ dữ liệu văn bản bị coi là công thức trên Sheets/Excel).
+- Excel ba sổ: chuẩn hóa ngày giờ bằng giá trị Date, đồng nhất múi giờ Asia/Ho_Chi_Minh; SID/ngày sinh giữ dạng text.
+- TAT tư vấn phân loại đúng đến giây ở ngưỡng 15 phút. Tổng hợp ngày Tư vấn cần chạy lại để cập nhật sang schema thống kê 8.
+- Báo cáo Từ chối: tên đơn vị 11px, bảng 2 và 3 12px, ngày chữ nghiêng, ký tên khoảng trống 90px. SID 12 số và nhãn ngày sinh không xuống dòng trong hai form.
+- Service worker cache version: gm-static-v99.69. Không tự tải lại ứng dụng khi đang nhập.
 
-## Migration
-- Không thay đổi schema so với v58.41.
-- Nếu đã chạy `gm_upgradeSchemaTo5841()` thì **không chạy lại**.
-- Nếu chưa từng nâng từ v57.40 thì chạy `gm_upgradeSchemaTo5841()` đúng 1 lần.
+## Ghi chú vận hành
 
-Chưa upload GitHub / chưa deploy trong gói này.
+Hàm `gm_checkDailySummary60()` chỉ kiểm tra trigger/tổng hợp ngày trên dự án Apps Script thực tế, không tự cài trigger. Hàm `gm_upgradeConsultTat15_()` thực hiện tái tổng hợp **mỗi lần tối đa 7 ngày** cần cập nhật; chạy lặp đến khi không còn ngày cũ. Không xóa dữ liệu nguồn.
+
+Archive: hiện giữ cơ chế từ chối thống kê thiếu dữ liệu khi có Archive mà chưa có bộ đọc đủ tin cậy. Chưa bổ sung xóa dữ liệu hoặc migration Archive trong bản này. Chỉ di chuyển/xóa dữ liệu nguồn sau khi triển khai cơ chế đọc lịch sử đã kiểm thử.
