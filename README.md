@@ -1,15 +1,15 @@
 # Sổ Giao nhận – Từ chối – Tư vấn mẫu – Bệnh viện Bạch Mai
 
-## Phiên bản 102.69 / 79.69 (API 17)
+## Phiên bản 103.70 / 80.70 (API 17)
 
-Frontend: 102.69; backend Apps Script: 79.69. Chỉ cập nhật frontend trên nền 101.69; backend, API 17, schema và Sheet giữ nguyên.
+Frontend: 103.70; backend Apps Script: 80.70. Chỉ sửa nội dung đã chốt; API 17, schema và Sheet giữ nguyên.
 
 - LOCAL mới/reset: mật khẩu ban đầu là mã nhân viên; bắt buộc đổi sau khi đăng nhập, chặn chức năng khác tại backend. SHARED_HHTM giữ nguyên.
 - Kiểm soát dữ liệu công khai (giới hạn số mẫu bằng cấu hình, giảm nguy cơ dữ liệu văn bản bị coi là công thức trên Sheets/Excel).
 - Excel ba sổ: chuẩn hóa ngày giờ bằng giá trị Date, đồng nhất múi giờ Asia/Ho_Chi_Minh; SID/ngày sinh giữ dạng text.
 - TAT tư vấn phân loại đúng đến giây ở ngưỡng 15 phút. Tổng hợp ngày Tư vấn cần chạy lại để cập nhật sang schema thống kê 8.
-- Báo cáo Từ chối: tên đơn vị 13px, dịch lên 5px, bảng 2 và 3 12px, ngày chữ nghiêng, ký tên khoảng trống 90px. SID 12 số và nhãn ngày sinh không xuống dòng trong hai form (ngày sinh 46% / SID 54%).
-- Service worker cache version: gm-static-v102.69. Không tự tải lại ứng dụng khi đang nhập.
+- Báo cáo Từ chối: tên đơn vị 13px, không dịch lên khi in, bảng 2 và 3 12px, ngày chữ nghiêng, ký tên khoảng trống 90px. SID 12 số và nhãn ngày sinh không xuống dòng trong hai form (ngày sinh 46% / SID 54%).
+- Service worker cache version: gm-static-v103.70. Không tự tải lại ứng dụng khi đang nhập.
 
 ## Ghi chú vận hành
 
@@ -23,3 +23,12 @@ Archive: hiện giữ cơ chế từ chối thống kê thiếu dữ liệu khi 
 - Các trường nhập liệu dưới XEM BÁO CÁO mặc định ẩn, chỉ hiện sau khi tải báo cáo thành công; đổi bộ lọc thì ẩn lại.
 - Giữ nguyên cơ chế cập nhật bản xem trước ngay khi nhập; nút LƯU chỉ ghi Google Sheets như trước.
 - Các định dạng 100.69–101.69 giữ nguyên; không cần thay đổi backend.
+
+## FIX 103.70 / 80.70
+
+- LOCAL: mật khẩu mới tối thiểu 4 ký tự (có thể 4 chữ số), mật khẩu mặc định vẫn là mã nhân viên; SHARED_HHTM giữ chuẩn tối thiểu 8 ký tự. Xóa ghi chú ở màn hình bắt buộc đổi, căn giữa nút, ẩn nút và hiển thị spinner khi lưu; bảo vệ chống gửi trùng.
+- Khi đổi người đăng nhập trên cùng máy: xóa tất cả form, các trường người thực hiện/ẩn ID, kết quả thống kê, báo cáo, tổng mẫu và cấu hình đang hiển thị; đặt lại state theo phiên; kết quả API cũ không được áp dụng sang phiên mới. Giữ nguyên hàng đợi chưa đồng bộ theo khóa tài khoản; cảnh báo khi còn bản nhập chưa lưu.
+- Báo cáo Từ chối: giữ chữ 13px, tăng line-height 1.4, đệm trên và không dịch lên trong bản in để tránh cắt dấu tiếng Việt.
+- Không thay đổi nghiệp vụ, Sheet, route API hay các danh mục quản trị.
+
+Kiểm tra cục bộ: cú pháp frontend/backend, mô phỏng đổi tài khoản A→B và chặn phản hồi phiên cũ; chưa thay thế nghiệm thu với tài khoản thực trên dữ liệu đang vận hành.
