@@ -145,8 +145,8 @@
       #gmPrintHost{font:9pt 'Times New Roman',serif!important}#gmPrintHost .gm-report-paper{min-width:0!important;width:100%!important;padding:0!important;font-size:9pt!important}
       #gmPrintHost th{font-size:7pt!important}#gmPrintHost td{font-size:7.5pt!important}#gmPrintHost thead{display:table-header-group}#gmPrintHost tr{break-inside:avoid}#gmPrintHost .gm-signatures{break-inside:avoid}}
 
-    /* 90.64 - giao diện khung đồng nhất; không đổi DOM nghiệp vụ */
-    #staffAppPage .staff-layout,#staffAppPage .reject-layout,#staffAppPage .stats-layout,#staffAppPage .settings-layout,#staffAppPage .gm-two-col{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:stretch;height:100%;min-height:0;min-width:0}
+    /* 91.64 - đồng bộ khung trái 35%, phải 65%; giữ chiều cao và bố cục mobile */
+    #staffAppPage .staff-layout,#staffAppPage .reject-layout,#staffAppPage .stats-layout,#staffAppPage .settings-layout,#staffAppPage .gm-two-col{grid-template-columns:minmax(0,35fr) minmax(0,65fr);gap:12px;align-items:stretch;height:100%;min-height:0;min-width:0}
     #staffAppPage .staff-layout>*,#staffAppPage .reject-layout>*,#staffAppPage .stats-layout>*,#staffAppPage .settings-layout>*,#staffAppPage .gm-two-col>*{min-width:0;min-height:0;height:100%;max-height:100%}
     #staffAppPage .gm-module-page:not(.hidden){display:flex;flex:1 1 auto;min-height:0;min-width:0;overflow:hidden}
     #staffAppPage .gm-module-page>.gm-two-col{flex:1 1 auto;min-height:0;width:100%}
@@ -506,13 +506,13 @@
     </section>
   </main>
 
-  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 90.64</footer>
+  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 91.64</footer>
 </div>
 <div id="modalRoot"></div><div id="toastWrap" class="toast-wrap"></div><div id="spinner" class="spinner-overlay hidden"><div class="spinner"></div></div>
 
 <script>
 /* ===== APP_CONFIG: START ===== */
-const APP_VERSION='90.64';
+const APP_VERSION='91.64';
 const API_URL='https://script.google.com/macros/s/AKfycbzajuPqWVK5K_GZ7Ab8b5qi7S1YfqffO5QFheoqJBBiFvvuqG1jo199n4-PvBOZgxP6Ew/exec';
 const CACHE_KEY_PUBLIC='GM_PUBLIC_CATALOG_CACHE_V7';
 const PUBLIC_RECHECK_MS=5*60*1000;
