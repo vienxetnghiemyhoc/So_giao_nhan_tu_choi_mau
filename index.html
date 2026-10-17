@@ -307,14 +307,18 @@
     }
 
     /* 99.69: Cân đối SID 12 số, không xuống dòng tên ngày sinh ở hai form */
-    #rejectPage .reject-birth-sid-row,#consultPage .reject-birth-sid-row{grid-template-columns:minmax(165px,1.42fr) minmax(130px,1fr);gap:8px;align-items:end}
+    /* 101.69: Thu gọn ô ngày sinh, mở rộng SID; cột co được theo bề rộng thực tế của form */
+    #rejectPage .reject-birth-sid-row,#consultPage .reject-birth-sid-row{width:100%;min-width:0;max-width:100%;grid-template-columns:minmax(0,46fr) minmax(0,54fr);gap:8px;align-items:end}
     #rejectPage .reject-birth-sid-row>.field,#consultPage .reject-birth-sid-row>.field{min-width:0}
     #rejectPage .reject-birth-sid-row>.field:first-child>label,#consultPage .reject-birth-sid-row>.field:first-child>label{font-size:12px;white-space:nowrap;line-height:1.15;min-height:19px;letter-spacing:0}
     #rejectSid,#consultSid{font-variant-numeric:tabular-nums;min-width:0;width:100%}
     @media(max-width:370px){#rejectPage .reject-birth-sid-row,#consultPage .reject-birth-sid-row{grid-template-columns:minmax(0,1fr)}}
+    /* 102.69: Chỉ hiển thị các trường biên soạn sau khi tải báo cáo thành công. */
+    #reportDetails:not(.hidden){display:flex;flex-direction:column;gap:12px;min-width:0}
     /* 99.69: Báo cáo Từ chối: thông tin đơn vị, bảng 2–3, ngày và bốn chữ ký */
-    .gm-report-paper .gm-report-header{font-size:11px;line-height:1.2}
-    .gm-report-paper .gm-signatures>div>.gm-sign-date{font-style:italic;line-height:1.15;margin:0}
+    /* 100.69: Tăng nhẹ tiêu đề đơn vị, dịch lên; nới khoảng ngày và chức danh tại cả 4 vùng ký */
+    .gm-report-paper .gm-report-header{font-size:13px;line-height:1.2;position:relative;top:-5px}
+    .gm-report-paper .gm-signatures>div>.gm-sign-date{font-style:italic;line-height:1.15;margin:0 0 6px}
     .gm-report-paper .gm-signatures>div>.gm-sign-role{display:block;line-height:1.15}
     .gm-report-paper .gm-signature-space{height:90px}
     #reportPreview .gm-report-conclusions th,#reportPreview .gm-report-conclusions td,
@@ -585,6 +589,7 @@
             <div class="field-row"><div class="field"><label for="reportMonth">Tháng</label><select id="reportMonth" class="control"></select></div><div class="field"><label for="reportYear">Năm</label><select id="reportYear" class="control"></select></div></div>
             <div class="field"><label for="reportSource">Nguồn tổng số mẫu</label><select id="reportSource" class="control"><option value="manual">Số liệu nhập theo tháng</option><option value="automatic">Tự động từ Sổ Giao nhận</option></select></div>
             <button id="reportSearch" type="button" class="btn btn-primary full-btn">XEM BÁO CÁO</button>
+            <div id="reportDetails" class="hidden">
             <div class="field gm-report-date-label"><label for="reportDate">Ngày báo cáo</label><input id="reportDate" type="date" class="control" autocomplete="off"></div>
             <div class="field autocomplete gm-signatory-search"><label for="reportReporterText">Người báo cáo</label><input id="reportReporterText" type="text" class="control" autocomplete="off" placeholder="Gõ mã hoặc tên nhân viên..."><input id="reportReporter" type="hidden"><div id="reportReporterSuggestions" class="suggestions hidden"></div></div>
             <div class="field gm-report-date-label"><label for="reviewDate">Ngày xem xét</label><input id="reviewDate" type="date" class="control" autocomplete="off"></div>
@@ -594,6 +599,7 @@
             <div class="field"><label for="reportAction">Hành động khắc phục đề xuất</label><textarea id="reportAction" class="control" rows="3"></textarea></div>
             <div class="field"><label for="reportFollowup">Theo dõi hành động khắc phục</label><textarea id="reportFollowup" class="control" rows="3"></textarea></div>
             <button id="reportSave" type="button" class="btn btn-outline full-btn" disabled>LƯU NỘI DUNG BÁO CÁO</button>
+            </div>
           </aside>
           <section class="card gm-result-panel">
             <div class="table-toolbar"><h2 id="reportPreviewTitle" class="panel-title">BÁO CÁO TỪ CHỐI MẪU</h2><div class="actions"><button id="reportPdf" type="button" class="icon-action gm-pdf-btn" title="Xuất PDF" aria-label="Xuất PDF" disabled>PDF</button><button id="reportPrint" type="button" class="icon-action gm-print-btn" title="In báo cáo" aria-label="In báo cáo" disabled></button></div></div>
@@ -643,13 +649,13 @@
     </section>
   </main>
 
-  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 99.69</footer>
+  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 102.69</footer>
 </div>
 <div id="modalRoot"></div><div id="toastWrap" class="toast-wrap"></div><div id="spinner" class="spinner-overlay hidden"><div class="spinner"></div></div>
 
 <script>
 /* ===== APP_CONFIG: START ===== */
-const APP_VERSION='99.69';
+const APP_VERSION='102.69';
 const API_URL='https://script.google.com/macros/s/AKfycbzajuPqWVK5K_GZ7Ab8b5qi7S1YfqffO5QFheoqJBBiFvvuqG1jo199n4-PvBOZgxP6Ew/exec';
 const CACHE_KEY_PUBLIC='GM_PUBLIC_CATALOG_CACHE_V7';
 const PUBLIC_RECHECK_MS=5*60*1000;
@@ -2107,12 +2113,12 @@ const RejectReportModule={
     ['reportReporter','reportReviewer','reportApprover'].forEach(id=>{AC[id]=bindAutocomplete({textId:id+'Text',hiddenId:id,suggestionsId:id+'Suggestions',getItems:()=>this.result?.staff||[],labelFn:x=>x.tenNhanVien,subFn:x=>x.maNhanVien+' · '+(x.maChuyenNganh||''),onSelect:markChanged});Ui.el(id+'Text').addEventListener('input',markChanged)});
     ['reportDate','reviewDate','approveDate'].forEach(id=>Ui.el(id).addEventListener('change',markChanged));
     ['reportAction','reportFollowup'].forEach(id=>Ui.el(id).addEventListener('input',()=>{if(!this.result)return;State.report.dirty=true;Ui.el('reportSave').disabled=false;this.refreshPreview()}));
-    this.updateTitle();['reportMonth','reportYear','reportSpecialty','reportSource'].forEach(id=>Ui.el(id).addEventListener('change',()=>{if(id==='reportSpecialty')this.updateTitle();if(State.report.dirty&&!confirm('Báo cáo có nội dung chưa lưu. Đổi kỳ và bỏ thay đổi?')){Ui.el(id).value=Ui.el(id).dataset.searchedValue||Ui.el(id).value;return}State.report.dirty=false;this.result=null;Ui.el('reportPreview').textContent='Nhấn XEM BÁO CÁO để tải số liệu mới.';['reportSave','reportPdf','reportPrint'].forEach(btn=>Ui.el(btn).disabled=true)}));
+    this.updateTitle();['reportMonth','reportYear','reportSpecialty','reportSource'].forEach(id=>Ui.el(id).addEventListener('change',()=>{if(id==='reportSpecialty')this.updateTitle();if(State.report.dirty&&!confirm('Báo cáo có nội dung chưa lưu. Đổi kỳ và bỏ thay đổi?')){Ui.el(id).value=Ui.el(id).dataset.searchedValue||Ui.el(id).value;return}State.report.dirty=false;this.result=null;Ui.show('reportDetails',false);Ui.el('reportPreview').textContent='Nhấn XEM BÁO CÁO để tải số liệu mới.';['reportSave','reportPdf','reportPrint'].forEach(btn=>Ui.el(btn).disabled=true)}));
   }},
   updateTitle(){const select=Ui.el('reportSpecialty'),name=select?.selectedOptions?.[0]?.textContent?.trim()||'',title=Ui.el('reportPreviewTitle');if(title)title.textContent='BÁO CÁO TỪ CHỐI MẪU'+(name?' '+name.toLocaleUpperCase('vi'):'')},
   args(){return{specialtyCode:Ui.el('reportSpecialty').value,month:Number(Ui.el('reportMonth').value),year:Number(Ui.el('reportYear').value)}},
   async search(){if(State.report.dirty&&!confirm('Có thay đổi chưa lưu. Tải lại sẽ bỏ các thay đổi đó. Tiếp tục?'))return;
-    this.updateTitle();await Ui.runButtonBusy(Ui.el('reportSearch'),async()=>{try{const r=await ApiService.auth('rejectReport',{...this.args(),source:Ui.el('reportSource').value},{timeoutMs:90000});this.result=r.data;State.report={loaded:true,data:r.data,dirty:false,savedMeta:r.data.meta};['reportMonth','reportYear','reportSpecialty','reportSource'].forEach(id=>Ui.el(id).dataset.searchedValue=Ui.el(id).value);const emps=r.data.staff||[];this.hydratingSignatories=true;['reportReporter','reportReviewer','reportApprover'].forEach((id,i)=>{const selected=[r.data.meta.reporterId,r.data.meta.reviewerId,r.data.meta.approverId][i]||'',item=emps.find(x=>x.maNhanVien===selected);AC[id]?.set(item||null);});this.hydratingSignatories=false;['reportDate','reviewDate','approveDate'].forEach((id,i)=>{Ui.el(id).value=([r.data.meta.reportDate,r.data.meta.reviewDate,r.data.meta.approveDate][i]||Ui.todayLocalDate());});Ui.el('reportAction').value=r.data.meta.actionPlan||'';Ui.el('reportFollowup').value=r.data.meta.followup||'';Ui.el('reportSave').disabled=true;Ui.el('reportPdf').disabled=false;Ui.el('reportPrint').disabled=false;this.refreshPreview();if(r.data.incomplete?.length)Ui.toast('Có '+r.data.incomplete.length+' khoa/phòng chưa nhập tổng số mẫu. Báo cáo sẽ hiển thị chưa đủ mẫu số.','warning')}catch(e){Ui.toast(e.message,'error')}})
+    this.updateTitle();await Ui.runButtonBusy(Ui.el('reportSearch'),async()=>{try{const r=await ApiService.auth('rejectReport',{...this.args(),source:Ui.el('reportSource').value},{timeoutMs:90000});this.result=r.data;State.report={loaded:true,data:r.data,dirty:false,savedMeta:r.data.meta};['reportMonth','reportYear','reportSpecialty','reportSource'].forEach(id=>Ui.el(id).dataset.searchedValue=Ui.el(id).value);const emps=r.data.staff||[];this.hydratingSignatories=true;['reportReporter','reportReviewer','reportApprover'].forEach((id,i)=>{const selected=[r.data.meta.reporterId,r.data.meta.reviewerId,r.data.meta.approverId][i]||'',item=emps.find(x=>x.maNhanVien===selected);AC[id]?.set(item||null);});this.hydratingSignatories=false;['reportDate','reviewDate','approveDate'].forEach((id,i)=>{Ui.el(id).value=([r.data.meta.reportDate,r.data.meta.reviewDate,r.data.meta.approveDate][i]||Ui.todayLocalDate());});Ui.el('reportAction').value=r.data.meta.actionPlan||'';Ui.el('reportFollowup').value=r.data.meta.followup||'';Ui.el('reportSave').disabled=true;Ui.el('reportPdf').disabled=false;Ui.el('reportPrint').disabled=false;this.refreshPreview();Ui.show('reportDetails',true);if(r.data.incomplete?.length)Ui.toast('Có '+r.data.incomplete.length+' khoa/phòng chưa nhập tổng số mẫu. Báo cáo sẽ hiển thị chưa đủ mẫu số.','warning')}catch(e){Ui.toast(e.message,'error')}})
   },
   meta(){return{reporterId:Ui.el('reportReporter').value,reviewerId:Ui.el('reportReviewer').value,approverId:Ui.el('reportApprover').value,actionPlan:Ui.el('reportAction').value,followup:Ui.el('reportFollowup').value,reportDate:Ui.el('reportDate').value,reviewDate:Ui.el('reviewDate').value,approveDate:Ui.el('approveDate').value,version:State.report.savedMeta?.version||0}},
   async save(){if(!this.result)return;for(const id of ['reportReporter','reportReviewer','reportApprover']){if(Ui.el(id+'Text').value.trim()&&!Ui.el(id).value){Ui.toast('Vui lòng chọn nhân viên từ danh sách gợi ý, không chỉ gõ tên.','error');Ui.el(id+'Text').focus();return}}await Ui.runButtonBusy(Ui.el('reportSave'),async()=>{try{const r=await ApiService.auth('rejectReportSave',{...this.args(),meta:this.meta()},{timeoutMs:60000});State.report.savedMeta=r.data.meta;State.report.dirty=false;Ui.el('reportSave').disabled=true;this.refreshPreview();Ui.toast('Đã lưu nội dung báo cáo.','success')}catch(e){Ui.toast(e.message,'error')}})},
@@ -2124,12 +2130,23 @@ const RejectReportModule={
   refreshPreview(){if(this.result){Ui.el('reportPreview').innerHTML=this.renderHTML()+'<div class="gm-report-preview-footer"><span>BM.05.QL12</span><span>Trang x/tổng số trang xác định khi in</span></div>';this.updateTitle()}},
   visibleRows(){return (this.result?.rows||[]).filter(r=>(Number(r.totalSamples)||0)>0||(Number(r.rejected)||0)>0)},
   reportMatrixRows(){const d=this.result||{},reasons=Array.from(new Set([...(d.reasonOptions||[]).map(x=>x.code),...(d.rows||[]).flatMap(r=>Object.values(r.types||{}).flatMap(m=>Object.keys(m||{})))])),typeNames=Object.fromEntries((d.typeOptions||[]).map(t=>[t.code,t.name||t.code]));return {reasons,typeNames}},
-  typeLabel(key){const d=this.result||{},item=(d.typeOptions||[]).find(x=>x.code===key),name=item?.name||key;return String(key||name).trim()||name},
+  typeLabel(key){const item=(this.result?.typeOptions||[]).find(x=>x.code===key);return String(item?.name||key||'').trim()||'—'},
   reasonParts(row,reason,base,print=false){return Object.entries(row.types||{}).filter(([,values])=>Number(values?.[reason])>0).map(([type,values])=>`${this.typeLabel(type)}: ${this.displayValue(Number(values[reason]),base)}`).join(' · ')||'—'},
   renderHTML(){const d=this.result;if(!d)return'';const esc=Ui.esc,num=n=>this.count(n),pct=(n,base)=>this.rate(n,base),isValid=n=>n!==null&&n!==undefined&&Number.isFinite(Number(n)),reasonOpts=d.reasonOptions||[],visible=this.visibleRows(),{reasons:reasonIds,typeNames}=this.reportMatrixRows(),reasonName=Object.fromEntries(reasonOpts.map(x=>[x.code,x.name])),totalTypes=this.currentTotals();
     const totalReason=(types,code)=>Object.values(types||{}).reduce((n,values)=>n+(Number(values?.[code])||0),0);
     const headings=`<thead><tr><th class="gm-report-stt">STT</th><th class="gm-report-unit">Đơn vị</th><th>Tổng mẫu</th><th>Từ chối</th><th>Tỷ lệ</th><th>Loại XN</th>${reasonIds.map(key=>`<th title="${esc(reasonName[key]||key)}">${esc(reasonName[key]||key)}</th>`).join('')}<th>TỔNG</th></tr></thead>`;
-    const rows=visible.map((r,i)=>{const activeTypes=Object.keys(r.types||{}).filter(key=>Object.values(r.types[key]||{}).some(n=>Number(n)>0)),typeList=activeTypes.length?activeTypes.map(x=>this.typeLabel(x)).join(' · '):'—',typeLines=activeTypes.length?activeTypes.map(x=>`<span class="gm-report-test-type">${esc(this.typeLabel(x))}</span>`).join(''):'—';return `<tr><td class="gm-report-stt">${i+1}</td><td class="gm-report-left gm-report-unit">${esc(r.unitName)}</td><td>${isValid(r.totalSamples)?num(r.totalSamples):'Chưa nhập'}</td><td>${num(r.rejected)}</td><td>${pct(r.rejected,r.totalSamples)}</td><td class="gm-report-type-cell" title="${esc(typeList)}">${typeLines}</td>${reasonIds.map(code=>{const count=totalReason(r.types,code);return `<td class="gm-reason-cell" title="${esc(this.reasonParts(r,code,r.rejected))}"><span class="gm-reason-total">${this.displayValue(count,r.rejected)}</span><span class="gm-reason-types">${count?' · '+esc(this.reasonParts(r,code,r.rejected)):''}</span></td>`}).join('')}<td><strong>${this.displayValue(r.rejected,r.rejected)}</strong></td></tr>`}).join('');
+    const typeOrder=Object.fromEntries((d.typeOptions||[]).map((x,i)=>[x.code,i]));
+    const rows=visible.map((r,i)=>{
+      const activeTypes=Object.keys(r.types||{}).filter(key=>Object.values(r.types[key]||{}).some(n=>Number(n)>0));
+      activeTypes.sort((a,b)=>(typeOrder[a]??999999)-(typeOrder[b]??999999)||a.localeCompare(b,'vi'));
+      // Khoa có tổng mẫu nhưng không từ chối vẫn có một dòng riêng.
+      const typeKeys=activeTypes.length?activeTypes:[null],span=typeKeys.length;
+      return typeKeys.map((key,j)=>{
+        const reasonCounts=key?(r.types[key]||{}):{},typeTotal=Object.values(reasonCounts).reduce((n,v)=>n+(Number(v)||0),0);
+        const shared=j===0?`<td rowspan="${span}" class="gm-report-stt">${i+1}</td><td rowspan="${span}" class="gm-report-left gm-report-unit">${esc(r.unitName)}</td><td rowspan="${span}">${isValid(r.totalSamples)?num(r.totalSamples):'Chưa nhập'}</td><td rowspan="${span}">${num(r.rejected)}</td><td rowspan="${span}">${pct(r.rejected,r.totalSamples)}</td>`:'';
+        return `<tr>${shared}<td class="gm-report-type-cell">${key?esc(this.typeLabel(key)):'—'}</td>${reasonIds.map(code=>`<td class="gm-reason-cell">${this.displayValue(Number(reasonCounts[code])||0,r.rejected)}</td>`).join('')}<td><strong>${this.displayValue(typeTotal,r.rejected)}</strong></td></tr>`;
+      }).join('');
+    }).join('');
     const totalCases=reasonIds.map(code=>totalReason(totalTypes,code)),totalRow=`<tr class="gm-report-grand"><td></td><td class="gm-report-left"><strong>TỔNG CỘNG</strong></td><td><strong>${isValid(d.totalSamples)?num(d.totalSamples):'Chưa đủ'}</strong></td><td><strong>${num(d.totalRejected)}</strong></td><td><strong>${pct(d.totalRejected,d.totalSamples)}</strong></td><td>—</td>${totalCases.map(n=>`<td><strong>${this.displayValue(n,d.totalRejected)}</strong></td>`).join('')}<td><strong>${this.displayValue(d.totalRejected,d.totalRejected)}</strong></td></tr>`;
     const top=visible.filter(r=>r.totalSamples>0&&r.rejected>0).slice().sort((a,b)=>(b.rejected/b.totalSamples-a.rejected/a.totalSamples)||b.rejected-a.rejected).slice(0,10);
     const causes=reasonIds.filter(key=>totalReason(totalTypes,key)>0).map((key,i)=>`<tr><td class="gm-report-stt">${i+1}</td><td class="gm-report-left">${esc(reasonName[key]||key)}</td><td>${pct(totalReason(totalTypes,key),d.totalSamples)}</td><td class="gm-report-left">${esc(reasonOpts.find(x=>x.code===key)?.nguyenNhan||'—')}</td></tr>`).join('');
