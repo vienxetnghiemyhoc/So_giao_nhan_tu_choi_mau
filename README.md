@@ -1,15 +1,15 @@
 # Sổ Giao nhận – Từ chối – Tư vấn mẫu – Bệnh viện Bạch Mai
 
-## Phiên bản 104.71 / 81.71 (API 17)
+## Phiên bản 105.71 / 81.72 (API 17)
 
-Frontend: 104.71; backend Apps Script: 81.71. Chỉ sửa nội dung đã chốt; API 17, schema và Sheet giữ nguyên.
+Frontend: 105.71; backend Apps Script: 81.72. Chỉ sửa nội dung đã chốt; API 17, schema và Sheet giữ nguyên.
 
 - LOCAL mới/reset: mật khẩu ban đầu là mã nhân viên; bắt buộc đổi sau khi đăng nhập, chặn chức năng khác tại backend. SHARED_HHTM giữ nguyên.
 - Kiểm soát dữ liệu công khai (giới hạn số mẫu bằng cấu hình, giảm nguy cơ dữ liệu văn bản bị coi là công thức trên Sheets/Excel).
 - Excel ba sổ: chuẩn hóa ngày giờ bằng giá trị Date, đồng nhất múi giờ Asia/Ho_Chi_Minh; SID/ngày sinh giữ dạng text.
 - TAT tư vấn phân loại đúng đến giây ở ngưỡng 15 phút. Tổng hợp ngày Tư vấn cần chạy lại để cập nhật sang schema thống kê 8.
 - Báo cáo Từ chối: tên đơn vị 13px, không dịch lên khi in, bảng 2 và 3 12px, ngày chữ nghiêng, ký tên khoảng trống 90px. SID 12 số và nhãn ngày sinh không xuống dòng trong hai form (ngày sinh 46% / SID 54%).
-- Service worker cache version: gm-static-v104.71. Không tự tải lại ứng dụng khi đang nhập.
+- Service worker cache version: gm-static-v105.71. Không tự tải lại ứng dụng khi đang nhập.
 
 ## Ghi chú vận hành
 
@@ -37,3 +37,9 @@ Kiểm tra cục bộ: cú pháp frontend/backend, mô phỏng đổi tài kho�
 
 - Giao nhận mẫu: bộ lọc Viện/TT/Khoa thực hiện phụ thuộc Điểm tập trung (chuyên ngành) hoặc Điểm tại khoa (nhóm xét nghiệm). Chọn đợt có mẫu phù hợp nhưng giữ nguyên toàn bộ mẫu và tổng của đợt. Lọc đồng nhất XEM DS, phân trang, Excel, cache và danh sách cục bộ. Không thêm Sheet hay cột.
 - Nhãn nút Thống kê: THỐNG KÊ. Hai ô ngày sinh/SID chia 50%–50% tại Từ chối và Tư vấn.
+
+## FIX 105.71 – Trạng thái Cài đặt sau đăng xuất
+
+- Dùng cùng cấu trúc `State.settings` cho khởi tạo và reset phiên đăng nhập; không còn thiếu `adminLists` khi XEM DANH SÁCH sau đăng xuất/đăng nhập lại.
+- Ngăn kết quả tải danh sách, preload Cài đặt, tìm nhân viên reset mật khẩu và cấu hình ngưỡng thuộc phiên cũ cập nhật state phiên mới.
+- Không sửa API, schema, Sheet và logic ghi dữ liệu backend.
