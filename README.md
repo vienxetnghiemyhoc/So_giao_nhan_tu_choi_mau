@@ -1,15 +1,15 @@
 # Sổ Giao nhận – Từ chối – Tư vấn mẫu – Bệnh viện Bạch Mai
 
-## Phiên bản 107.72 / 82.73 (API 17)
+## Phiên bản 108.72 / 82.73 (API 17)
 
-Frontend: 107.72; backend Apps Script: 82.73. Chỉ sửa nội dung đã chốt; API 17, schema và Sheet giữ nguyên.
+Frontend: 108.72; backend Apps Script: 82.73. Chỉ sửa nội dung đã chốt; API 17, schema và Sheet giữ nguyên.
 
 - LOCAL mới/reset: mật khẩu ban đầu là mã nhân viên; bắt buộc đổi sau khi đăng nhập, chặn chức năng khác tại backend. SHARED_HHTM giữ nguyên.
 - Kiểm soát dữ liệu công khai (giới hạn số mẫu bằng cấu hình, giảm nguy cơ dữ liệu văn bản bị coi là công thức trên Sheets/Excel).
 - Excel ba sổ: chuẩn hóa ngày giờ bằng giá trị Date, đồng nhất múi giờ Asia/Ho_Chi_Minh; SID/ngày sinh giữ dạng text.
 - TAT tư vấn phân loại đúng đến giây ở ngưỡng 15 phút. Tổng hợp ngày Tư vấn cần chạy lại để cập nhật sang schema thống kê 8.
 - Báo cáo Từ chối: tên đơn vị 13px, không dịch lên khi in, bảng 2 và 3 12px, ngày chữ nghiêng, ký tên khoảng trống 90px. SID 12 số và nhãn ngày sinh không xuống dòng trong hai form (ngày sinh 46% / SID 54%).
-- Service worker cache version: gm-static-v107.72. Không tự tải lại ứng dụng khi đang nhập.
+- Service worker cache version: gm-static-v108.72. Không tự tải lại ứng dụng khi đang nhập.
 
 ## Ghi chú vận hành
 
@@ -58,3 +58,9 @@ Kiểm tra cục bộ: cú pháp frontend/backend, mô phỏng đổi tài kho�
 - Dùng duy nhất một footer trong suốt; vẫn hiển thị trên màn hình chờ nhờ thứ tự lớp phù hợp.
 - Điện thoại/máy tính bảng: tự ẩn footer khi phát hiện bàn phím ảo để không che biểu mẫu; hiện lại khi đóng bàn phím.
 - Không thay đổi nghiệp vụ, API hoặc dữ liệu; Apps Script giữ 82.73.
+
+## FIX frontend 108.72 – bàn phím iPhone
+
+- Sửa lỗi footer vẫn nhô lên khi Safari iPhone không phát tín hiệu co `visualViewport` đủ lớn.
+- Trên màn hình nhỏ, ẩn footer ngay khi focus vào ô nhập văn bản, không còn phụ thuộc ngưỡng giảm chiều cao 130 px; tự hiển thị lại khi thoát ô nhập.
+- Giữ nguyên nền đăng nhập, màn hình chờ, QR gửi mẫu và logic nghiệp vụ; backend vẫn 82.73.
