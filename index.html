@@ -666,13 +666,13 @@
     </section>
   </main>
 
-  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 107.72</footer>
+  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 108.72</footer>
 </div>
 <div id="modalRoot"></div><div id="toastWrap" class="toast-wrap"></div><div id="spinner" class="spinner-overlay hidden"><div class="spinner"></div></div>
 
 <script>
 /* ===== APP_CONFIG: START ===== */
-const APP_VERSION='107.72';
+const APP_VERSION='108.72';
 const API_URL='https://script.google.com/macros/s/AKfycbzajuPqWVK5K_GZ7Ab8b5qi7S1YfqffO5QFheoqJBBiFvvuqG1jo199n4-PvBOZgxP6Ew/exec';
 const CACHE_KEY_PUBLIC='GM_PUBLIC_CATALOG_CACHE_V8';
 const PUBLIC_RECHECK_MS=5*60*1000;
@@ -900,18 +900,15 @@ const AppCore={
   syncLoginFacilityStyle(){const el=Ui.el('loginFacility');if(el)el.classList.toggle('login-facility-selected',!!el.value)},
   previewLoginFacility(){this.syncLoginFacilityStyle();const code=Ui.el('loginFacility')?.value||State.sessionSite||'',hospital=code?this.facilityHospitalTitle(code):'BỆNH VIỆN BẠCH MAI';Ui.el('brandHospital').textContent=hospital;const loginHospital=Ui.el('loginBrandHospital');if(loginHospital)loginHospital.textContent='BỆNH VIỆN BẠCH MAI'},
   bindViewport(){
-    let lastWidth=0,fullHeight=0;
     const apply=()=>{
-      const vv=window.visualViewport,h=Math.round(vv?.height||window.innerHeight||document.documentElement.clientHeight),w=Math.round(window.innerWidth||vv?.width||0);
+      const h=Math.round(window.visualViewport?.height||window.innerHeight||document.documentElement.clientHeight);
       if(h>0)document.documentElement.style.setProperty('--app-visible-height',h+'px');
-      if(w!==lastWidth){lastWidth=w;fullHeight=h;}
+      // iOS Safari may resize both viewports together: hide the footer on text focus,
+      // not only after detecting a change in viewport height.
       const active=document.activeElement,typing=!!active?.matches?.('input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]),textarea,[contenteditable="true"]');
-      if(!typing)fullHeight=Math.max(fullHeight,h);
-      const mobile=window.matchMedia('(max-width:1100px) and (pointer:coarse)').matches;
-      const keyboardOpen=mobile&&typing&&(Math.max(fullHeight-h,(window.innerHeight||h)-h)>130);
-      document.documentElement.classList.toggle('gm-keyboard-open',keyboardOpen);
+      document.documentElement.classList.toggle('gm-keyboard-open',window.matchMedia('(max-width:1100px)').matches&&typing);
     };
-    apply();window.addEventListener('resize',apply,{passive:true});document.addEventListener('focusin',apply);document.addEventListener('focusout',apply);window.visualViewport?.addEventListener('resize',apply,{passive:true});window.visualViewport?.addEventListener('scroll',apply,{passive:true});
+    apply();window.addEventListener('resize',apply,{passive:true});document.addEventListener('focusin',apply);document.addEventListener('focusout',()=>requestAnimationFrame(apply));window.visualViewport?.addEventListener('resize',apply,{passive:true});window.visualViewport?.addEventListener('scroll',apply,{passive:true});
   },
   bindGlobal(){
     document.addEventListener('click',e=>{if(!e.target.closest('.autocomplete'))document.querySelectorAll('.suggestions').forEach(x=>x.classList.add('hidden'))});
