@@ -379,6 +379,15 @@
         width:100%;z-index:10000;
       }
     }
+
+    /* 110.72: Show full reason master names/causes in growing multiline editors. */
+    .draft-reason-master td:nth-child(3){min-width:310px;width:310px}
+    .draft-reason-master td:nth-child(4){min-width:450px;width:450px}
+    .draft-reason-master textarea.draft-multiline{
+      display:block;width:100%;min-height:56px;padding:8px;
+      font:13px/1.4 Arial,sans-serif;white-space:pre-wrap;
+      overflow-y:hidden;resize:vertical;
+    }
   </style>
 </head>
 <body>
@@ -704,13 +713,13 @@
     </section>
   </main>
 
-  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 109.72</footer>
+  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 110.72</footer>
 </div>
 <div id="modalRoot"></div><div id="toastWrap" class="toast-wrap"></div><div id="spinner" class="spinner-overlay hidden"><div class="spinner"></div></div>
 
 <script>
 /* ===== APP_CONFIG: START ===== */
-const APP_VERSION='109.72';
+const APP_VERSION='110.72';
 const API_URL='https://script.google.com/macros/s/AKfycbzajuPqWVK5K_GZ7Ab8b5qi7S1YfqffO5QFheoqJBBiFvvuqG1jo199n4-PvBOZgxP6Ew/exec';
 const CACHE_KEY_PUBLIC='GM_PUBLIC_CATALOG_CACHE_V8';
 const PUBLIC_RECHECK_MS=5*60*1000;
@@ -1876,6 +1885,14 @@ const SettingsModule={
     }else if(kind==='TRANSPORT_SCOPE'){
       const scope=this.ensureUnitScope();rows=(c.transportScope||[]).filter(x=>x.systemCode===State.settings.transportSystem&&x.userSpecialtyCode===scope).map(r=>this.cloneDraftRow(r,kind));
     }
+    if(kind==='REJECT'){
+      // Respect ThuTu of each master/applicability list. Do not reorder dirty
+      // rows while users edit: buildDraft only runs when a new draft is made.
+      return rows.sort((a,b)=>{
+        const ao=Number(a.order),bo=Number(b.order),aRank=Number.isFinite(ao)&&ao>0?ao:1e9,bRank=Number.isFinite(bo)&&bo>0?bo:1e9;
+        return aRank-bRank||String(a.code||'').localeCompare(String(b.code||''),'vi',{numeric:true});
+      });
+    }
     return rows.sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')))
   },
   ensureDraft(){
@@ -2047,7 +2064,7 @@ const SettingsModule={
       return `<div class="settings-section">${modeBar}${this.toolbar(title,null)}<div class="small muted settings-note">Tích chọn mục áp dụng cho khoa/phòng đang chọn. Danh mục mới mặc định không áp dụng.</div><div class="table-scroll"><table class="data-table draft-table" style="min-width:760px"><thead><tr><th>Trạng thái lưu</th><th>Mã</th><th>${Ui.esc(meta.title)} chuẩn</th>${otherHead}<th>Áp dụng</th><th>Thứ tự</th></tr></thead><tbody>${rows.map((r,i)=>`<tr data-draft-row="${i}"><td>${this.rowStatusHtml(r,kind)}</td><td>${Ui.esc(r.code)}</td><td>${Ui.esc(r.name)}${r.masterStatus&&r.masterStatus!=='Hoạt động'?'<div class="small muted">Ngừng hoạt động bởi Admin</div>':''}</td>${otherCell(r)}<td class="center"><input class="draft-apply" type="checkbox" ${r.status==='AP_DUNG'?'checked':''} ${r.masterStatus&&r.masterStatus!=='Hoạt động'?'disabled title="Danh mục chuẩn đã ngừng hoạt động"':''}></td><td><input class="control draft-order" type="number" min="1" value="${Number(r.order||1)}"></td></tr>`).join('')||`<tr><td colspan="${type==='REASON'?7:5}" class="empty-state">Admin chưa tạo danh mục chuẩn.</td></tr>`}</tbody></table></div></div>`;
     }
     const adminMaster=mode==='MASTER',cols=type==='REASON'?10:8,statusOptions=adminMaster?'<option value="Hoạt động">Hoạt động</option><option value="Ngừng hoạt động">Ngừng hoạt động</option>':'<option value="AP_DUNG">Đang áp dụng</option><option value="KHONG_AP_DUNG">Không áp dụng</option>',note=adminMaster?'<div class="small muted settings-note">Admin quản lý danh mục chuẩn. Phạm vi áp dụng cho từng khoa được cấu hình ở mục PHẠM VI ÁP DỤNG.</div>':'';
-    return `<div class="settings-section">${modeBar}${this.toolbar(meta.title,'THÊM')}${note}<div class="table-scroll"><table class="data-table draft-table" style="min-width:900px"><thead><tr><th>Trạng thái lưu</th><th>Mã</th><th>Tên</th>${type==='REASON'?'<th>Nguyên nhân</th><th>Lý do khác</th>':''}<th>Trạng thái</th><th>Thứ tự</th><th>Người thêm</th><th>Thời gian thêm</th><th></th></tr></thead><tbody>${rows.map((r,i)=>`<tr data-draft-row="${i}"><td>${this.rowStatusHtml(r,kind)}</td><td>${r.isNew?'<span class="draft-new-code">Tự động</span>':Ui.esc(r.code)}</td><td><input class="control draft-name" value="${Ui.esc(r.name||'')}"></td>${type==='REASON'?`<td><input class="control draft-cause" maxlength="500" value="${Ui.esc(r.nguyenNhan||'')}" placeholder="Nguyên nhân khả dĩ"></td><td class="center"><input class="draft-other" type="checkbox" ${r.isOther?'checked':''}></td>`:''}<td><select class="control draft-status">${statusOptions.replace(`value="${r.status}"`,`value="${r.status}" selected`)}</select></td><td>${r.isNew?'<span class="draft-new-code">Tự động</span>':`<input class="control draft-order" type="number" min="1" value="${r.order||1}">`}</td><td>${Ui.esc(r.isNew?(State.user?.tenNhanVien||''):this.creatorName(r))}</td><td>${Ui.esc(this.creatorTime(r))}</td><td class="center">${r.isNew?`<button type="button" class="draft-remove-btn" data-action="removeSettingsDraft" data-index="${i}" title="Xóa dòng chưa lưu">×</button>`:''}</td></tr>`).join('')||`<tr><td colspan="${cols}" class="empty-state">Chưa có cấu hình. Nhấn THÊM để tạo mới.</td></tr>`}</tbody></table></div></div>`;
+    return `<div class="settings-section">${modeBar}${this.toolbar(meta.title,'THÊM')}${note}<div class="table-scroll"><table class="data-table draft-table${type==='REASON'?' draft-reason-master':''}" style="min-width:${type==='REASON'?'1680':'900'}px"><thead><tr><th>Trạng thái lưu</th><th>Mã</th><th>Tên</th>${type==='REASON'?'<th>Nguyên nhân</th><th>Lý do khác</th>':''}<th>Trạng thái</th><th>Thứ tự</th><th>Người thêm</th><th>Thời gian thêm</th><th></th></tr></thead><tbody>${rows.map((r,i)=>`<tr data-draft-row="${i}"><td>${this.rowStatusHtml(r,kind)}</td><td>${r.isNew?'<span class="draft-new-code">Tự động</span>':Ui.esc(r.code)}</td><td>${type==='REASON'?`<textarea class="control draft-name draft-multiline" rows="2">${Ui.esc(r.name||'')}</textarea>`:`<input class="control draft-name" value="${Ui.esc(r.name||'')}">`}</td>${type==='REASON'?`<td><textarea class="control draft-cause draft-multiline" maxlength="500" rows="2" placeholder="Nguyên nhân khả dĩ">${Ui.esc(r.nguyenNhan||'')}</textarea></td><td class="center"><input class="draft-other" type="checkbox" ${r.isOther?'checked':''}></td>`:''}<td><select class="control draft-status">${statusOptions.replace(`value="${r.status}"`,`value="${r.status}" selected`)}</select></td><td>${r.isNew?'<span class="draft-new-code">Tự động</span>':`<input class="control draft-order" type="number" min="1" value="${r.order||1}">`}</td><td>${Ui.esc(r.isNew?(State.user?.tenNhanVien||''):this.creatorName(r))}</td><td>${Ui.esc(this.creatorTime(r))}</td><td class="center">${r.isNew?`<button type="button" class="draft-remove-btn" data-action="removeSettingsDraft" data-index="${i}" title="Xóa dòng chưa lưu">×</button>`:''}</td></tr>`).join('')||`<tr><td colspan="${cols}" class="empty-state">Chưa có cấu hình. Nhấn THÊM để tạo mới.</td></tr>`}</tbody></table></div></div>`;
   },
   addCurrentDraft(){
     this.captureDraft();const kind=this.currentKind();
@@ -2197,7 +2214,11 @@ const SettingsModule={
     box.querySelectorAll('[data-action]').forEach(btn=>btn.addEventListener('click',()=>{const a=btn.dataset.action;if(a==='setRejectApplicabilityMode')return this.setRejectMode('APPLICABILITY');if(a==='setRejectMasterMode')return this.setRejectMode('MASTER');if(a==='setTestGroupApplicabilityMode')return this.setTestGroupMode('APPLICABILITY');if(a==='setTestGroupMasterMode')return this.setTestGroupMode('MASTER');if(a==='loadManagementList')this.loadManagementList();if(a==='refreshManagementList')this.loadManagementList(true);if(a==='addSettingsDraft')this.addCurrentDraft();if(a==='editSettingsDraft'){this.captureDraft();const i=Number(btn.dataset.index),row=State.settings.draft?.[i],kind=this.currentKind();if(kind==='EMPLOYEES')this.employeeModal(row,i);else if(kind==='UNIT'||kind==='SPECIALTY')this.catalogModal(kind,row,i);else if(kind.startsWith('RECEIVE_POINT_')&&kind!=='RECEIVE_POINT_GROUP')this.receivePointModal(kind.replace('RECEIVE_POINT_',''),row,i);else if(kind.startsWith('TRANSPORT_'))this.transportModal(kind.replace('TRANSPORT_',''),row,i)}if(a==='removeSettingsDraft')this.removeDraftRow(Number(btn.dataset.index));if(a==='saveSettingsDraft')this.saveCurrentDraft(btn);if(a==='cancelSettingsDraft')this.cancelCurrentDraft();if(a==='downloadImportTemplate')ExcelSettingsImport.downloadTemplate();if(a==='importExcel')ExcelSettingsImport.pickFile();if(a==='rebuildSummary')this.rebuildSummary(btn);if(a==='loadReportThresholds')ReportThresholdSettings.load(btn);if(a==='saveReportThresholds')ReportThresholdSettings.save(btn);if(a==='clearUnsyncedLocalQueues')this.clearUnsyncedLocalQueues(btn);if(a==='copyPublicLink')this.copyPublicLink(btn);if(a==='downloadQr')this.downloadQr(btn);if(a==='printQr')this.printQr(btn);if(a==='installApp')PwaInstall.install(btn);if(a==='changePassword')this.changePassword(btn);if(a==='resetPassword')this.resetPassword()}));
     const empSearch=Ui.el('settingsEmployeeSearch');if(empSearch){empSearch.addEventListener('input',()=>{State.settings.employeeSearch=empSearch.value;this.applyEmployeeSearch()});this.applyEmployeeSearch()}
     box.querySelectorAll('.employee-permission').forEach(el=>el.addEventListener('change',()=>{const i=Number(el.dataset.index),r=State.settings.draft?.[i];if(!r)return;const set=new Set(Array.isArray(r.tabsAllowed)?r.tabsAllowed:String(r.tabsAllowed||'').split(',').map(x=>x.trim()).filter(Boolean));el.checked?set.add(el.dataset.permission):set.delete(el.dataset.permission);r.tabsAllowed=[...set];this.updateDirty()}));box.querySelectorAll('.employee-export').forEach(el=>el.addEventListener('change',()=>{const r=State.settings.draft?.[Number(el.dataset.index)];if(!r)return;r.canExportExcel=el.checked;this.updateDirty()}));
-    const mark=()=>{this.captureDraft()};box.querySelectorAll('.draft-name,.draft-status,.draft-order,.draft-other,.draft-apply,.draft-station-no,.draft-station-name').forEach(el=>el.addEventListener('input',mark));box.querySelectorAll('.draft-status,.draft-other,.draft-apply').forEach(el=>el.addEventListener('change',mark));
+    const mark=()=>{this.captureDraft()};
+    // Fit the saved multiline content on first render and on every edit.
+    const fitReasonEditor=el=>{el.style.height='auto';el.style.height=Math.max(56,el.scrollHeight+2)+'px'};
+    box.querySelectorAll('.draft-reason-master textarea.draft-multiline').forEach(el=>{fitReasonEditor(el);el.addEventListener('input',()=>fitReasonEditor(el))});
+    box.querySelectorAll('.draft-name,.draft-cause,.draft-status,.draft-order,.draft-other,.draft-apply,.draft-station-no,.draft-station-name').forEach(el=>el.addEventListener('input',mark));box.querySelectorAll('.draft-status,.draft-other,.draft-apply').forEach(el=>el.addEventListener('change',mark));
     const resetUser=Ui.el('passwordResetUserText');if(resetUser){delete AutocompleteRegistry.passwordResetUserText;AC.settingsResetUser=bindAutocomplete({textId:'passwordResetUserText',hiddenId:'passwordResetUserId',suggestionsId:'passwordResetSuggestions',getItems:()=>this.passwordResetCandidates(),labelFn:x=>x.maNhanVien+' - '+x.tenNhanVien,subFn:x=>x.vaiTro+' · '+x.trangThai+' · '+x.nguonDangNhap,onSelect:()=>this.updatePasswordResetFields()});resetUser.addEventListener('input',()=>{this.updatePasswordResetFields();const settingsAtStart=State.settings,token=State.token,epoch=StaffApp.authEpoch,seq=++State.settings.passwordResetSearchSeq,q=resetUser.value.trim();const isCurrent=()=>State.settings===settingsAtStart&&State.token===token&&StaffApp.authEpoch===epoch&&seq===settingsAtStart.passwordResetSearchSeq;clearTimeout(this.passwordResetTimer);State.settings.passwordResetResults=[];if(q.length<2)return;this.passwordResetTimer=setTimeout(async()=>{if(!isCurrent())return;try{const r=await ApiService.auth('settingsResetUserSearch',{query:q});if(!isCurrent()||!resetUser.isConnected||resetUser.value.trim()!==q)return;State.settings.passwordResetResults=Array.isArray(r.data?.items)?r.data.items:[];resetUser.dispatchEvent(new Event('focus'))}catch(e){if(isCurrent())Ui.toast(e.message,'error')}},300)})}
 
     if(State.settings.section==='reportThresholds')ReportThresholdSettings.bind();
