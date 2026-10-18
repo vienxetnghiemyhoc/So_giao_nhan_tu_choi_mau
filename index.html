@@ -85,7 +85,6 @@
     /* Single transparent footer; it stays visible over the loading screen without a second copy. */
     .app-footer{flex:0 0 auto;position:relative;font-size:11px;color:#6b706c;text-align:center;padding:3px 12px 4px;line-height:1.2;background:transparent;pointer-events:none}
     .app-loading-overlay:not(.hidden)~.app-shell>.app-footer{z-index:10000}
-    @media(max-width:1100px){.gm-keyboard-open .app-footer{display:none}}
     .vi-date-wrap{position:relative;min-width:0;height:42px}.vi-date-display{position:absolute;inset:0;width:100%;height:42px;background:#fff;padding-right:72px;cursor:pointer}.vi-date-native{position:absolute;right:0;top:0;width:42px;height:42px;opacity:0;cursor:pointer;z-index:4}.date-clear-btn{position:absolute;right:42px;top:0;width:30px;height:42px;border:0;background:transparent;color:#6b6f72;font-size:19px;z-index:5;cursor:pointer}.date-clear-btn:hover{background:#eef2ef;color:var(--gm-green)}.date-calendar-icon{position:absolute;right:0;top:0;width:42px;height:42px;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:3;color:var(--gm-green)}.date-calendar-icon svg{width:19px;height:19px;fill:currentColor}
     .empty-state{padding:32px 20px;text-align:center;color:var(--gm-sub)}.small{font-size:11px}.error-text{color:var(--gm-danger)}.nowrap{white-space:nowrap}
     #staffAppPage{height:100%;min-height:0;overflow:hidden;display:flex;flex-direction:column}
@@ -341,6 +340,45 @@
     .receive-filter-bar .filter-performing label{white-space:nowrap;letter-spacing:-.15px}
     .receive-filter-bar .filter-performing select{min-width:0;width:100%}
     @media(max-width:1100px){.receive-filter-bar .filter-performing{grid-column:1/3}.receive-filter-bar .filter-performing label{white-space:normal}}
+
+    /* 109.72: Natural document scrolling for phone/tablet login and public QR forms.
+       Do not make the whole form a visualViewport-height flex pane: on iOS its
+       footer can rise into the content/keyboard region even after the text hides. */
+    @media (max-width:820px), (max-width:1100px) and (pointer:coarse){
+      html:has(.app-shell.login-mode),body:has(.app-shell.login-mode),
+      html:has(#publicSendPage:not(.hidden)),body:has(#publicSendPage:not(.hidden)){
+        height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto;
+      }
+      .app-shell.login-mode,.app-shell:has(#publicSendPage:not(.hidden)){
+        height:auto;min-height:100dvh;overflow:visible;
+      }
+      .app-shell.login-mode>.app-main,
+      .app-shell:has(#publicSendPage:not(.hidden))>.app-main{
+        flex:1 0 auto;height:auto;min-height:0;overflow:visible;
+      }
+      #staffLoginPage.staff-login-wrap{
+        height:auto;min-height:calc(100dvh - 40px);overflow:visible;
+      }
+      #staffLoginPage .staff-login-card{
+        height:auto;min-height:0;max-height:none;overflow:visible;
+        grid-template-rows:auto auto auto;
+      }
+      #publicSendPage.public-send-page{
+        height:auto;min-height:0;overflow:visible;
+        scroll-padding-bottom:0;
+      }
+      .app-shell.login-mode>.app-footer,
+      .app-shell:has(#publicSendPage:not(.hidden))>.app-footer{
+        position:relative;flex:0 0 auto;margin-top:auto;z-index:1;
+        background:transparent;
+      }
+      /* Same footer is visible at the bottom of the full-screen loading mask.
+         Fixed positioning is limited to the loading state, never input forms. */
+      #appLoadingOverlay:not(.hidden)~#app>.app-footer{
+        position:fixed;left:0;right:0;bottom:env(safe-area-inset-bottom);
+        width:100%;z-index:10000;
+      }
+    }
   </style>
 </head>
 <body>
@@ -666,13 +704,13 @@
     </section>
   </main>
 
-  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 108.72</footer>
+  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 109.72</footer>
 </div>
 <div id="modalRoot"></div><div id="toastWrap" class="toast-wrap"></div><div id="spinner" class="spinner-overlay hidden"><div class="spinner"></div></div>
 
 <script>
 /* ===== APP_CONFIG: START ===== */
-const APP_VERSION='108.72';
+const APP_VERSION='109.72';
 const API_URL='https://script.google.com/macros/s/AKfycbzajuPqWVK5K_GZ7Ab8b5qi7S1YfqffO5QFheoqJBBiFvvuqG1jo199n4-PvBOZgxP6Ew/exec';
 const CACHE_KEY_PUBLIC='GM_PUBLIC_CATALOG_CACHE_V8';
 const PUBLIC_RECHECK_MS=5*60*1000;
@@ -900,15 +938,10 @@ const AppCore={
   syncLoginFacilityStyle(){const el=Ui.el('loginFacility');if(el)el.classList.toggle('login-facility-selected',!!el.value)},
   previewLoginFacility(){this.syncLoginFacilityStyle();const code=Ui.el('loginFacility')?.value||State.sessionSite||'',hospital=code?this.facilityHospitalTitle(code):'BỆNH VIỆN BẠCH MAI';Ui.el('brandHospital').textContent=hospital;const loginHospital=Ui.el('loginBrandHospital');if(loginHospital)loginHospital.textContent='BỆNH VIỆN BẠCH MAI'},
   bindViewport(){
-    const apply=()=>{
-      const h=Math.round(window.visualViewport?.height||window.innerHeight||document.documentElement.clientHeight);
-      if(h>0)document.documentElement.style.setProperty('--app-visible-height',h+'px');
-      // iOS Safari may resize both viewports together: hide the footer on text focus,
-      // not only after detecting a change in viewport height.
-      const active=document.activeElement,typing=!!active?.matches?.('input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]),textarea,[contenteditable="true"]');
-      document.documentElement.classList.toggle('gm-keyboard-open',window.matchMedia('(max-width:1100px)').matches&&typing);
-    };
-    apply();window.addEventListener('resize',apply,{passive:true});document.addEventListener('focusin',apply);document.addEventListener('focusout',()=>requestAnimationFrame(apply));window.visualViewport?.addEventListener('resize',apply,{passive:true});window.visualViewport?.addEventListener('scroll',apply,{passive:true});
+    // The fixed-height staff dashboard still needs the visible-viewport height.
+    // Login and public QR forms use natural document scrolling on mobile (CSS).
+    const apply=()=>{const h=Math.round(window.visualViewport?.height||window.innerHeight||document.documentElement.clientHeight);if(h>0)document.documentElement.style.setProperty('--app-visible-height',h+'px')};
+    apply();window.addEventListener('resize',apply,{passive:true});window.visualViewport?.addEventListener('resize',apply,{passive:true});
   },
   bindGlobal(){
     document.addEventListener('click',e=>{if(!e.target.closest('.autocomplete'))document.querySelectorAll('.suggestions').forEach(x=>x.classList.add('hidden'))});
