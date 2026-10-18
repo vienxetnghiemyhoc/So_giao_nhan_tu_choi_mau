@@ -1,15 +1,15 @@
 # Sổ Giao nhận – Từ chối – Tư vấn mẫu – Bệnh viện Bạch Mai
 
-## Phiên bản 110.72 / 82.73 (API 17)
+## Phiên bản 111.72 / 82.73 (API 17)
 
-Frontend: 110.72; backend Apps Script: 82.73. Chỉ sửa nội dung đã chốt; API 17, schema và Sheet giữ nguyên.
+Frontend: 111.72; backend Apps Script: 82.73. Chỉ sửa nội dung đã chốt; API 17, schema và Sheet giữ nguyên.
 
 - LOCAL mới/reset: mật khẩu ban đầu là mã nhân viên; bắt buộc đổi sau khi đăng nhập, chặn chức năng khác tại backend. SHARED_HHTM giữ nguyên.
 - Kiểm soát dữ liệu công khai (giới hạn số mẫu bằng cấu hình, giảm nguy cơ dữ liệu văn bản bị coi là công thức trên Sheets/Excel).
 - Excel ba sổ: chuẩn hóa ngày giờ bằng giá trị Date, đồng nhất múi giờ Asia/Ho_Chi_Minh; SID/ngày sinh giữ dạng text.
 - TAT tư vấn phân loại đúng đến giây ở ngưỡng 15 phút. Tổng hợp ngày Tư vấn cần chạy lại để cập nhật sang schema thống kê 8.
 - Báo cáo Từ chối: tên đơn vị 13px, không dịch lên khi in, bảng 2 và 3 12px, ngày chữ nghiêng, ký tên khoảng trống 90px. SID 12 số và nhãn ngày sinh không xuống dòng trong hai form (ngày sinh 46% / SID 54%).
-- Service worker cache version: gm-static-v110.72. Không tự tải lại ứng dụng khi đang nhập.
+- Service worker cache version: gm-static-v111.72. Không tự tải lại ứng dụng khi đang nhập.
 
 ## Ghi chú vận hành
 
@@ -79,3 +79,11 @@ Kiểm tra cục bộ: cú pháp frontend/backend, mô phỏng đổi tài kho�
 - Sửa riêng Nguyên nhân cũng bật LƯU THAY ĐỔI; chỉ gửi các dòng đã thay đổi như cơ chế hiện có.
 - Danh mục từ chối (danh mục chuẩn và phạm vi áp dụng) sắp theo ThuTu tăng dần rồi mã, không còn theo CreatedAt. Trong lúc có bản nháp chưa lưu không thay đổi thứ tự các dòng; sau lưu dựng lại từ dữ liệu mới.
 - Backend 82.73, API 17, Sheet và các mã danh mục LD giữ nguyên.
+
+
+## Frontend 111.72 – Hiệu ứng halo quanh logo khi chờ đăng nhập
+
+- Hai vòng sáng xanh lan nhẹ quanh logo Bệnh viện Bạch Mai trên màn hình chờ; logo hiện tại không thay đổi.
+- CSS thuần, không thêm ảnh, timer, API hay request mạng; tắt chuyển động khi trình duyệt ưu tiên giảm hiệu ứng.
+- Giới hạn kích thước theo khung nhìn để không che thông báo chờ trên màn hình điện thoại nằm ngang.
+- Backend 82.73, API 17, cấu trúc Sheet và các chức năng nghiệp vụ giữ nguyên.
