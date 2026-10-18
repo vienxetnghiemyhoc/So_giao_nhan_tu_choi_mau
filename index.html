@@ -388,11 +388,38 @@
       font:13px/1.4 Arial,sans-serif;white-space:pre-wrap;
       overflow-y:hidden;resize:vertical;
     }
+
+    /* 111.72: A soft two-wave halo surrounding the existing loading logo.
+       CSS only: no extra assets, timers, or login/network changes. */
+    .app-loading-logo-shell{
+      position:relative;isolation:isolate;display:grid;place-items:center;
+      width:min(416px,72vw,56svh);max-width:100%;margin-bottom:28px;
+    }
+    .app-loading-logo-shell .app-loading-logo{
+      position:relative;z-index:1;width:100%;height:auto;margin-bottom:0;
+    }
+    .app-loading-logo-shell::before,.app-loading-logo-shell::after{
+      content:"";position:absolute;inset:-3%;z-index:0;
+      border:2px solid rgba(13,130,63,.32);border-radius:50%;
+      box-shadow:0 0 17px rgba(13,130,63,.12);
+      pointer-events:none;opacity:0;transform:scale(.92);
+      animation:gmLoadingHalo 3.6s ease-out infinite;
+    }
+    .app-loading-logo-shell::after{animation-delay:1.8s}
+    @keyframes gmLoadingHalo{
+      0%{opacity:0;transform:scale(.92)}
+      18%{opacity:.5}
+      75%{opacity:.12}
+      100%{opacity:0;transform:scale(1.16)}
+    }
+    @media(prefers-reduced-motion:reduce){
+      .app-loading-logo-shell::before,.app-loading-logo-shell::after{animation:none;display:none}
+    }
   </style>
 </head>
 <body>
   <svg id="gmIconSprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none"><defs><symbol id="gm-icon-receive" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5h6M9 9h6M9 13h6M9 17h4"/></symbol><symbol id="gm-icon-reject" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5h6m-5 6 5 5m0-5-5 5"/></symbol><symbol id="gm-icon-consult" viewBox="0 0 24 24"><path d="M5 5h14v11H8l-4 3V5Zm5 4h6m-6 3h4"/></symbol><symbol id="gm-icon-monthly" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4m8-4v4M8 14h3m5 0h-3M8 17h3"/></symbol><symbol id="gm-icon-stats" viewBox="0 0 24 24"><path d="M4 20V12h4v8m4 0V8h4v12m4 0V4h3v16M2 20h21"/></symbol><symbol id="gm-icon-report" viewBox="0 0 24 24"><path d="M6 2h8l4 4v16H6zM14 2v5h4M9 11h6M9 15h6M9 19h4"/></symbol><symbol id="gm-icon-settings" viewBox="0 0 24 24"><path d="M10.05 2.5h3.9l.5 2.25c.65.22 1.24.56 1.79.98l2.2-.77 1.94 3.36-1.74 1.5c.12.72.12 1.64 0 2.36l1.74 1.5-1.94 3.36-2.2-.77c-.55.42-1.14.76-1.79.98l-.5 2.25h-3.9l-.5-2.25c-.65-.22-1.24-.56-1.79-.98l-2.2.77-1.94-3.36 1.74-1.5a8 8 0 0 1 0-2.36l-1.74-1.5 1.94-3.36 2.2.77c.55-.42 1.14-.76 1.79-.98z" transform="translate(0 1)"/><circle cx="12" cy="12" r="3.2"/></symbol><symbol id="gm-icon-employees" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 20v-2a5.5 5.5 0 0 1 11 0v2H3.5ZM16.5 5.5a3 3 0 0 1 0 6M17 14a4 4 0 0 1 3.5 4v2"/></symbol><symbol id="gm-icon-units" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 7h2m4 0h2M8 11h2m4 0h2M8 15h2m4 0h2M10 21v-3h4v3"/></symbol><symbol id="gm-icon-specialties" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="m8 7 3 9M16 7l-3 9M8 6h8"/></symbol><symbol id="gm-icon-receivePointConfig" viewBox="0 0 24 24"><path d="M12 22s-7-7.5-7-13a7 7 0 0 1 14 0c0 5.5-7 13-7 13Z"/><circle cx="12" cy="9" r="2.5"/></symbol><symbol id="gm-icon-transportConfig" viewBox="0 0 24 24"><path d="M3 6h11v12H3zM14 10h4l3 4v4h-7z"/><circle cx="7" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></symbol><symbol id="gm-icon-rejectConfig" viewBox="0 0 24 24"><path d="M12 2 21 6v6c0 5-3.5 8.5-9 10-5.5-1.5-9-5-9-10V6l9-4Z"/><path d="M12 7v6m0 4h.01"/></symbol><symbol id="gm-icon-summary" viewBox="0 0 24 24"><path d="M3 11a9 9 0 1 0 3-6.5M3 4v5h5M12 7v5l3 2"/></symbol><symbol id="gm-icon-queueCleanup" viewBox="0 0 24 24"><path d="M5 6h14M7 6V4h10v2m1 0-1 15H7L6 6m4 4v7m4-7v7"/></symbol><symbol id="gm-icon-password" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></symbol><symbol id="gm-icon-qr" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM6 6h1m10 0h1M6 17h1m7-3h3m4 0v3m-7 4h3m4-3v3"/></symbol><symbol id="gm-icon-install" viewBox="0 0 24 24"><path d="M12 3v13m-4-4 4 4 4-4M4 18v3h16v-3"/></symbol><symbol id="gm-icon-POINT" viewBox="0 0 24 24"><path d="M12 22s-7-7.5-7-13a7 7 0 0 1 14 0c0 5.5-7 13-7 13Z"/><circle cx="12" cy="9" r="2.5"/></symbol><symbol id="gm-icon-ASSIGNMENT" viewBox="0 0 24 24"><circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="12" cy="19" r="2"/><path d="M6.5 7 11 17M17.5 7 13 17"/></symbol><symbol id="gm-icon-GROUP" viewBox="0 0 24 24"><rect x="3" y="5" width="5" height="5" rx="1"/><rect x="16" y="4" width="5" height="5" rx="1"/><rect x="16" y="15" width="5" height="5" rx="1"/><path d="M8 7.5h5v-1h3m-3 1v10h3"/></symbol><symbol id="gm-icon-SYSTEM" viewBox="0 0 24 24"><path d="M3 6h11v12H3zM14 10h4l3 4v4h-7z"/><circle cx="7" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></symbol><symbol id="gm-icon-STATION" viewBox="0 0 24 24"><path d="M12 20V9m-4 11h8M7 10a7 7 0 0 1 10 0M4 7a11 11 0 0 1 16 0"/><circle cx="12" cy="8" r="1.5"/></symbol><symbol id="gm-icon-LOCATION" viewBox="0 0 24 24"><path d="M12 22s-7-7.5-7-13a7 7 0 0 1 14 0c0 5.5-7 13-7 13Z"/><circle cx="12" cy="9" r="2.5"/></symbol><symbol id="gm-icon-REASON" viewBox="0 0 24 24"><path d="m12 3 10 18H2L12 3Zm0 6v5m0 3v.5"/></symbol></defs></svg>
-  <div id="appLoadingOverlay" class="app-loading-overlay hidden" aria-live="polite"><div class="app-loading-card"><img class="app-loading-logo" src="./logo-bachmai.png" alt="Logo Bệnh viện Bạch Mai"><div class="app-loading-text"><span id="appLoadingText">Đang tải dữ liệu</span><span id="appLoadingDots" class="app-loading-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></div><button id="appLoadingRetry" type="button" class="btn btn-primary app-loading-retry hidden">THỬ LẠI</button></div></div>
+  <div id="appLoadingOverlay" class="app-loading-overlay hidden" aria-live="polite"><div class="app-loading-card"><div class="app-loading-logo-shell"><img class="app-loading-logo" src="./logo-bachmai.png" alt="Logo Bệnh viện Bạch Mai"></div><div class="app-loading-text"><span id="appLoadingText">Đang tải dữ liệu</span><span id="appLoadingDots" class="app-loading-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></div><button id="appLoadingRetry" type="button" class="btn btn-primary app-loading-retry hidden">THỬ LẠI</button></div></div>
 <div id="app" class="app-shell">
   <header class="app-header">
     <div class="brand-wrap">
@@ -713,13 +740,13 @@
     </section>
   </main>
 
-  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 110.72</footer>
+  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 111.72</footer>
 </div>
 <div id="modalRoot"></div><div id="toastWrap" class="toast-wrap"></div><div id="spinner" class="spinner-overlay hidden"><div class="spinner"></div></div>
 
 <script>
 /* ===== APP_CONFIG: START ===== */
-const APP_VERSION='110.72';
+const APP_VERSION='111.72';
 const API_URL='https://script.google.com/macros/s/AKfycbzajuPqWVK5K_GZ7Ab8b5qi7S1YfqffO5QFheoqJBBiFvvuqG1jo199n4-PvBOZgxP6Ew/exec';
 const CACHE_KEY_PUBLIC='GM_PUBLIC_CATALOG_CACHE_V8';
 const PUBLIC_RECHECK_MS=5*60*1000;
