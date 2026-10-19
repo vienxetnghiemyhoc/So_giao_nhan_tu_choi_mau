@@ -20,6 +20,7 @@ jobs:
         run: python -m pip install --disable-pip-version-check pillow numpy opencv-python-headless
       - name: Create transparent Android and green iOS PWA icons
         run: |
+          python - <<'PY'
           from PIL import Image, ImageFilter
           import cv2, numpy as np, json, re
           from pathlib import Path
@@ -90,6 +91,7 @@ jobs:
           assert Image.open("icon-maskable-512.png").getpixel((0,0))[3]==255
           assert Image.open("apple-touch-icon.png").getpixel((0,0))[3]==255
           print("All icon/PWA validations passed")
+          PY
       - name: Commit only icon/PWA assets and version
         run: |
           git config user.name 'github-actions[bot]'
