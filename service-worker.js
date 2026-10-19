@@ -1,9 +1,10 @@
-const CACHE_NAME='gm-static-v111.72';
+const CACHE_NAME='gm-static-v113.72';
 const STATIC_ASSETS=[
   './',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
+  './icon-maskable-512.png',
   './apple-touch-icon.png',
   './favicon-64.png',
   './logo-bachmai.png'

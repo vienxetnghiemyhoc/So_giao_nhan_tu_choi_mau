@@ -1,15 +1,15 @@
 # Sổ Giao nhận – Từ chối – Tư vấn mẫu – Bệnh viện Bạch Mai
 
-## Phiên bản 111.72 / 82.73 (API 17)
+## Phiên bản 113.72 / 82.73 (API 17)
 
-Frontend: 111.72; backend Apps Script: 82.73. Chỉ sửa nội dung đã chốt; API 17, schema và Sheet giữ nguyên.
+Frontend: 113.72; backend Apps Script: 82.73. Chỉ sửa nội dung đã chốt; API 17, schema và Sheet giữ nguyên.
 
 - LOCAL mới/reset: mật khẩu ban đầu là mã nhân viên; bắt buộc đổi sau khi đăng nhập, chặn chức năng khác tại backend. SHARED_HHTM giữ nguyên.
 - Kiểm soát dữ liệu công khai (giới hạn số mẫu bằng cấu hình, giảm nguy cơ dữ liệu văn bản bị coi là công thức trên Sheets/Excel).
 - Excel ba sổ: chuẩn hóa ngày giờ bằng giá trị Date, đồng nhất múi giờ Asia/Ho_Chi_Minh; SID/ngày sinh giữ dạng text.
 - TAT tư vấn phân loại đúng đến giây ở ngưỡng 15 phút. Tổng hợp ngày Tư vấn cần chạy lại để cập nhật sang schema thống kê 8.
 - Báo cáo Từ chối: tên đơn vị 13px, không dịch lên khi in, bảng 2 và 3 12px, ngày chữ nghiêng, ký tên khoảng trống 90px. SID 12 số và nhãn ngày sinh không xuống dòng trong hai form (ngày sinh 46% / SID 54%).
-- Service worker cache version: gm-static-v111.72. Không tự tải lại ứng dụng khi đang nhập.
+- Service worker cache version: gm-static-v113.72. Không tự tải lại ứng dụng khi đang nhập.
 
 ## Ghi chú vận hành
 
@@ -87,3 +87,9 @@ Kiểm tra cục bộ: cú pháp frontend/backend, mô phỏng đổi tài kho�
 - CSS thuần, không thêm ảnh, timer, API hay request mạng; tắt chuyển động khi trình duyệt ưu tiên giảm hiệu ứng.
 - Giới hạn kích thước theo khung nhìn để không che thông báo chờ trên màn hình điện thoại nằm ngang.
 - Backend 82.73, API 17, cấu trúc Sheet và các chức năng nghiệp vụ giữ nguyên.
+
+
+## Frontend 113.72 – Icon cài đặt PWA không viền trắng
+- Icon cài đặt Android nền trong suốt; maskable nền xanh phủ kín; iPhone nền xanh, không viền trắng.
+- Cập nhật biểu tượng 192/512px, apple-touch, favicon, master, manifest và cache PWA.
+- Giữ nguyên màn hình chờ logo 112.72, API và backend 82.73.
