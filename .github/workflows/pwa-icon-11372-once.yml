@@ -1,0 +1,100 @@
+name: One-time PWA icon update 113.72
+on:
+  push:
+    paths:
+      - '.github/workflows/pwa-icon-11372-once.yml'
+permissions:
+  contents: write
+jobs:
+  prepare-icons:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install image-processing libraries
+        run: python -m pip install --disable-pip-version-check pillow numpy opencv-python-headless
+      - name: Create transparent Android and green iOS PWA icons
+        run: |
+          from PIL import Image, ImageFilter
+          import cv2, numpy as np, json, re
+          from pathlib import Path
+          base=Path(".")
+          im=Image.open("app-icon-master.png").convert("RGB")
+          a=np.asarray(im)
+          hsv=cv2.cvtColor(a,cv2.COLOR_RGB2HSV)
+          binary=np.uint8((hsv[:,:,1]>15)&(hsv[:,:,2]<252))*255
+          n,lbl,stats,_=cv2.connectedComponentsWithStats(binary,8)
+          comp=1+int(np.argmax(stats[1:,cv2.CC_STAT_AREA]))
+          mask=np.uint8(lbl==comp)*255
+          contours,_=cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+          contour=max(contours,key=cv2.contourArea)
+          fill=np.zeros(a.shape[:2],dtype=np.uint8)
+          cv2.drawContours(fill,[contour],-1,255,-1)
+          fill=cv2.morphologyEx(fill,cv2.MORPH_CLOSE,np.ones((5,5),dtype=np.uint8))
+          fill=cv2.GaussianBlur(fill,(0,0),1.1)
+          x,y,w,h=cv2.boundingRect(contour)
+          tile=Image.fromarray(np.dstack([a,fill]),"RGBA").crop((x,y,x+w,y+h))
+          def centered(size,ratio=.987):
+              scale=min(size*ratio/w,size*ratio/h)
+              wi,hi=round(w*scale),round(h*scale)
+              t=tile.resize((wi,hi),Image.Resampling.LANCZOS)
+              out=Image.new("RGBA",(size,size),(0,0,0,0))
+              out.alpha_composite(t,((size-wi)//2,(size-hi)//2))
+              return out
+          def background(size):
+              yy,xx=np.mgrid[0:size,0:size]
+              t=np.clip(.27+(xx+yy)/(size*2)*.7,0,1)
+              bright=np.array([191.,218.,207.]);dark=np.array([87.,140.,128.])
+              rgb=(bright[None,None,:]*(1-t[:,:,None])+dark[None,None,:]*t[:,:,None]).astype(np.uint8)
+              return Image.fromarray(np.dstack([rgb,np.full((size,size),255,dtype=np.uint8)]),"RGBA")
+          for size in (192,512):
+              centered(size).save(f"icon-{size}.png",optimize=True)
+          touch=background(180)
+          touch.alpha_composite(centered(180,1.02))
+          touch.save("apple-touch-icon.png",optimize=True)
+          maskable=background(512)
+          maskable.alpha_composite(centered(512,.78))
+          maskable.save("icon-maskable-512.png",optimize=True)
+          centered(64,.97).save("favicon-64.png",optimize=True)
+          centered(512).resize((1254,1254),Image.Resampling.LANCZOS).save("app-icon-master.png",optimize=True)
+          manifest_path=base/"manifest.json"
+          m=json.loads(manifest_path.read_text(encoding="utf-8"))
+          m["icons"]=[
+              {"src":"./icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+              {"src":"./icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+              {"src":"./icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+          ]
+          manifest_path.write_text(json.dumps(m,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+          p=base/"service-worker.js"
+          sw=p.read_text(encoding="utf-8")
+          assert sw.count("gm-static-v111.72")==1
+          assert sw.count("  './icon-512.png',")==1
+          sw=sw.replace("gm-static-v111.72","gm-static-v113.72").replace("  './icon-512.png',","  './icon-512.png',\n  './icon-maskable-512.png',")
+          p.write_text(sw,encoding="utf-8")
+          p=base/"index.html";html=p.read_text(encoding="utf-8")
+          assert html.count("const APP_VERSION='112.72';")==1
+          assert html.count("Version 112.72</footer>")==1
+          html=html.replace("const APP_VERSION='112.72';","const APP_VERSION='113.72';").replace("Version 112.72</footer>","Version 113.72</footer>")
+          p.write_text(html,encoding="utf-8")
+          p=base/"README.md";readme=p.read_text(encoding="utf-8")
+          assert "Phiên bản 111.72 / 82.73" in readme
+          readme=readme.replace("Phiên bản 111.72 / 82.73","Phiên bản 113.72 / 82.73").replace("Frontend: 111.72;","Frontend: 113.72;").replace("gm-static-v111.72","gm-static-v113.72")
+          readme+="\n\n## Frontend 113.72 – Icon cài đặt PWA không viền trắng\n- Icon cài đặt Android nền trong suốt; maskable nền xanh phủ kín; iPhone nền xanh, không viền trắng.\n- Cập nhật biểu tượng 192/512px, apple-touch, favicon, master, manifest và cache PWA.\n- Giữ nguyên màn hình chờ logo 112.72, API và backend 82.73.\n"
+          p.write_text(readme,encoding="utf-8")
+          assert Image.open("icon-512.png").getpixel((0,0))[3]==0
+          assert Image.open("icon-maskable-512.png").getpixel((0,0))[3]==255
+          assert Image.open("apple-touch-icon.png").getpixel((0,0))[3]==255
+          print("All icon/PWA validations passed")
+      - name: Commit only icon/PWA assets and version
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add icon-192.png icon-512.png icon-maskable-512.png apple-touch-icon.png favicon-64.png app-icon-master.png manifest.json service-worker.js index.html README.md
+          git diff --cached --check
+          git commit -m 'fix(pwa): remove white icon border; add maskable Android icon (113.72)'
+          git push origin HEAD:main
