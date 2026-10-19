@@ -389,8 +389,8 @@
       overflow-y:hidden;resize:vertical;
     }
 
-    /* 111.72: A soft two-wave halo surrounding the existing loading logo.
-       CSS only: no extra assets, timers, or login/network changes. */
+    /* 112.72: Always-visible animated rings OUTSIDE the loading logo. CSS only.
+       The earlier pulse faded to zero and was obscured behind the white disc. */
     .app-loading-logo-shell{
       position:relative;isolation:isolate;display:grid;place-items:center;
       width:min(416px,72vw,56svh);max-width:100%;margin-bottom:28px;
@@ -399,21 +399,26 @@
       position:relative;z-index:1;width:100%;height:auto;margin-bottom:0;
     }
     .app-loading-logo-shell::before,.app-loading-logo-shell::after{
-      content:"";position:absolute;inset:-3%;z-index:0;
-      border:2px solid rgba(13,130,63,.32);border-radius:50%;
-      box-shadow:0 0 17px rgba(13,130,63,.12);
-      pointer-events:none;opacity:0;transform:scale(.92);
-      animation:gmLoadingHalo 3.6s ease-out infinite;
+      content:"";position:absolute;border-radius:50%;pointer-events:none;z-index:2;
     }
-    .app-loading-logo-shell::after{animation-delay:1.8s}
-    @keyframes gmLoadingHalo{
-      0%{opacity:0;transform:scale(.92)}
-      18%{opacity:.5}
-      75%{opacity:.12}
-      100%{opacity:0;transform:scale(1.16)}
+    .app-loading-logo-shell::before{
+      inset:-13px;border:4px solid rgba(6,125,51,.32);
+      border-top-color:#087b37;border-right-color:#36ac67;
+      box-shadow:0 0 0 4px rgba(18,132,55,.07),0 0 24px rgba(9,128,50,.22);
+      animation:gmLogoOrbit 2.8s linear infinite;
+    }
+    .app-loading-logo-shell::after{
+      inset:-27px;border:2px solid rgba(15,132,56,.42);
+      box-shadow:0 0 16px rgba(12,135,55,.16);
+      animation:gmLogoBreath 2.6s ease-in-out infinite;
+    }
+    @keyframes gmLogoOrbit{to{transform:rotate(360deg)}}
+    @keyframes gmLogoBreath{
+      0%,100%{opacity:.45;transform:scale(.985)}
+      50%{opacity:1;transform:scale(1.04)}
     }
     @media(prefers-reduced-motion:reduce){
-      .app-loading-logo-shell::before,.app-loading-logo-shell::after{animation:none;display:none}
+      .app-loading-logo-shell::before,.app-loading-logo-shell::after{animation:none}
     }
   </style>
 </head>
@@ -740,13 +745,13 @@
     </section>
   </main>
 
-  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 111.72</footer>
+  <footer class="app-footer">Design by ThS. Nguyễn Văn Chính - Viện Huyết học và Truyền máu Bạch Mai - Bệnh viện Bạch Mai&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version 112.72</footer>
 </div>
 <div id="modalRoot"></div><div id="toastWrap" class="toast-wrap"></div><div id="spinner" class="spinner-overlay hidden"><div class="spinner"></div></div>
 
 <script>
 /* ===== APP_CONFIG: START ===== */
-const APP_VERSION='111.72';
+const APP_VERSION='112.72';
 const API_URL='https://script.google.com/macros/s/AKfycbzajuPqWVK5K_GZ7Ab8b5qi7S1YfqffO5QFheoqJBBiFvvuqG1jo199n4-PvBOZgxP6Ew/exec';
 const CACHE_KEY_PUBLIC='GM_PUBLIC_CATALOG_CACHE_V8';
 const PUBLIC_RECHECK_MS=5*60*1000;
